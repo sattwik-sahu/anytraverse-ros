@@ -1,0 +1,10 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+build/
+install/
+log/
+
+.env
+.env.*
