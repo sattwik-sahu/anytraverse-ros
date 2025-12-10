@@ -24,7 +24,7 @@ class AnyTraverseNode(Node):
         # Fast QoS
         fast_qos = QoSProfile(
             depth=1,
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            reliability=QoSReliabilityPolicy.RELIABLE,
             history=QoSHistoryPolicy.KEEP_LAST,
         )
 
@@ -197,10 +197,13 @@ class AnyTraverseNode(Node):
 def main():
     rclpy.init()
     node = AnyTraverseNode()
-    rclpy.spin(node=node)
-    node.destroy_node()
-    rclpy.shutdown()
-    cv2.destroyAllWindows()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":

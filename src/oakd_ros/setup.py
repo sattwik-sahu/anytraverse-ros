@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 import os
 from glob import glob
 
-package_name = "anytraverse_ros"
+package_name = "oakd_ros"
 
 setup(
     name=package_name,
@@ -25,9 +25,6 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": [
-            "anytraverse_node = anytraverse_ros.anytraverse_node:main",
-            "depth_trav_to_obstacles = anytraverse_ros.obstacle_cloud:main",
-        ],
+        "console_scripts": ["oakd_node = oakd_ros.oakd_node:main"],
     },
 )

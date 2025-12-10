@@ -4,9 +4,9 @@ from typing import Optional
 
 import zmq
 
-from anytraverse_ros.oakd_vio_zmq._typing import RGBD_VIO_Message
-from anytraverse_ros.oakd_vio_zmq.helpers import get_zmq_uri
-from anytraverse_ros.oakd_vio_zmq.utils import parse_message
+from oakd_ros._typing import RGBD_VIO_Message
+from oakd_ros.helpers import get_zmq_uri
+from oakd_ros.utils import parse_message
 
 
 class Subscriber:

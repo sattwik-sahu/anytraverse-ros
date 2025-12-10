@@ -16,7 +16,8 @@ Pointcloud = npt.NDArray[Float]
 TransformationMatrix = npt.NDArray[Float]
 """The transformation matrix from current pose to starting pose"""
 
-DepthMap = npt.NDArray[Float]
+DepthMap = npt.NDArray[np.uint16]
+"""The depth map of the current view in the camera"""
 
 
 class NDArrayMetadata(TypedDict):

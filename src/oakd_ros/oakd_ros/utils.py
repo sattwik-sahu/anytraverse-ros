@@ -2,7 +2,7 @@ import numpy as np
 import ormsgpack
 from numpy import typing as npt
 
-from anytraverse_ros.oakd_vio_zmq._typing import (
+from oakd_ros._typing import (
     DepthMap,
     Image,
     NDArrayMetadata,

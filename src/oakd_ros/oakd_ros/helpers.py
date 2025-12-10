@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from anytraverse_ros.oakd_vio_zmq._typing import TransformationMatrix
+from oakd_ros._typing import TransformationMatrix
 
 
 def get_zmq_uri(name: str) -> str:

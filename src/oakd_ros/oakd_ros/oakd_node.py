@@ -12,8 +12,9 @@ from scipy.spatial.transform import Rotation as R
 from sensor_msgs.msg import CameraInfo, CompressedImage
 from std_msgs.msg import Header
 import cv2
+from tf2_ros import TransformBroadcaster
 
-from anytraverse_ros.oakd_vio_zmq.subscribe import Subscriber
+from oakd_ros.subscribe import Subscriber
 
 
 class OakdVIO_Node(Node):
@@ -28,7 +29,7 @@ class OakdVIO_Node(Node):
     def __init__(self) -> None:
         super().__init__(node_name="oakd_vio_node", namespace="/oakd")
 
-        fast_qos = QoSProfile(
+        qos_profile = QoSProfile(
             depth=1,
             reliability=QoSReliabilityPolicy.RELIABLE,
             history=QoSHistoryPolicy.KEEP_LAST,
@@ -38,18 +39,19 @@ class OakdVIO_Node(Node):
         # Publishers
         # -------------------------
         self._rgb_pub = self.create_publisher(
-            CompressedImage, "/camera/color/image_raw/compressed", fast_qos
+            CompressedImage, "/camera/color/image_raw/compressed", qos_profile
         )
         self._caminfo_pub = self.create_publisher(
-            CameraInfo, "/camera/color/camera_info", fast_qos
+            CameraInfo, "/camera/color/camera_info", qos_profile
         )
 
         # COMPRESSED DEPTH - fixed topic name
         self._depth_pub = self.create_publisher(
-            CompressedImage, "/camera/depth/image_raw/compressedDepth", fast_qos
+            CompressedImage, "/camera/depth/image_raw/compressedDepth", qos_profile
         )
 
-        self._tf_pub = self.create_publisher(TransformStamped, "/tf", fast_qos)
+        # self._tf_pub = self.create_publisher(TransformStamped, "/tf", fast_qos)
+        self._tf_broadcaster = TransformBroadcaster(self)
 
         self._bridge = CvBridge()
         self._lock = threading.Lock()
@@ -92,7 +94,7 @@ class OakdVIO_Node(Node):
 
                 self._publish_data(
                     rgb=sensor_data.rgb,
-                    depth_mm=sensor_data.depth,  # uint16 mm
+                    depth_mm=sensor_data.depth,
                     T=sensor_data.transform.astype(np.float32),
                 )
 
@@ -109,7 +111,7 @@ class OakdVIO_Node(Node):
         T: npt.NDArray[np.float32],
     ):
         now_msg = self.get_clock().now().to_msg()
-        header = Header(stamp=now_msg, frame_id="camera_link")
+        header = Header(stamp=now_msg, frame_id="camera_optical_link")
 
         # -------------------------
         # RGB COMPRESSED
@@ -193,7 +195,7 @@ class OakdVIO_Node(Node):
         # -------------------------
         try:
             tf = TransformStamped()
-            tf.header = Header(stamp=now_msg, frame_id="world")
+            tf.header = Header(stamp=now_msg, frame_id="odom")  # Or 'map'/'odom'
             tf.child_frame_id = "camera_link"
 
             Rmat = T[:3, :3]
@@ -209,7 +211,7 @@ class OakdVIO_Node(Node):
             tf.transform.rotation.z = float(quat[2])
             tf.transform.rotation.w = float(quat[3])
 
-            self._tf_pub.publish(tf)
+            self._tf_broadcaster.sendTransform(tf)
         except Exception as e:
             self.get_logger().error(f"TF publish error: {e}")
 
