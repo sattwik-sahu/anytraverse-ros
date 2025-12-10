@@ -5,14 +5,16 @@ import cv2
 import rclpy
 import torch
 from anytraverse import build_pipeline_from_paper
-from anytraverse.helpers import DEVICE
 from anytraverse.utils.state import TraversalState
+from anytraverse.utils.trav_pref import parse_trav_pref_syntax
 from cv_bridge import CvBridge
 from PIL import Image as PILImage
 from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Float32, Header, String
+
+from anytraverse_interfaces.srv import HumanOperatorCallSrv  # type: ignore
 
 
 class AnyTraverseNode(Node):
@@ -73,10 +75,24 @@ class AnyTraverseNode(Node):
             msg_type=Bool, topic="/anytraverse/hoc_req", qos_profile=fast_qos
         )
 
+        # Human operator call service
+        self._hoc_srv = self.create_service(
+            HumanOperatorCallSrv, "human_operator_call", self._hoc_service_callback
+        )  # type: ignore
+
         # Image message buffer for performance boost
         self._latest_msg = None
         self._busy = False
         self._lock = threading.Lock()
+
+    def _hoc_service_callback(self, request, response) -> None:
+        self.get_logger().info(f"HOC >>> {request.human_call_input}")
+        self._anytraverse.human_call(human_input=request.human_call_input)
+        response.updated_prompts = str(self._anytraverse.traversability_preferences)
+        self.get_logger().info(
+            f"Updated prompts: {self._anytraverse.traversability_preferences}"
+        )
+        return response
 
     def _image_callback(self, msg):
         img = self._bridge.compressed_imgmsg_to_cv2(msg)
@@ -115,32 +131,6 @@ class AnyTraverseNode(Node):
                 hoc_req=output.traversal_state is not TraversalState.OK,
                 incoming_header=header,
             )
-
-    # def _image_callback(self, msg: CompressedImage) -> None:
-    #     print("received image")
-    #     rgb = self._bridge.compressed_imgmsg_to_cv2(msg)
-    #     rgb_pil = PILImage.fromarray(rgb)
-
-    #     # Run inference through AnyTraverse
-    #     output = self._anytraverse.step(image=rgb_pil)
-
-    #     # Get the outputs to publish
-    #     trav_map = output.traversability_map
-    #     unc_map = output.uncertainty_map
-    #     roi_trav = output.roi_traversability
-    #     roi_unc = output.roi_uncertainty
-    #     trav_state = output.traversal_state.name
-    #     hoc_req = output.traversal_state is not TraversalState.OK
-
-    #     self._publish(
-    #         header=msg.header,
-    #         trav_map=trav_map,
-    #         unc_map=unc_map,
-    #         roi_trav=roi_trav,
-    #         roi_unc=roi_unc,
-    #         trav_state=trav_state,
-    #         hoc_req=hoc_req,
-    #     )
 
     def _publish(
         self,

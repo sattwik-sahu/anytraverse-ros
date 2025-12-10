@@ -20,9 +20,7 @@ setup(
     description="TODO: Package description",
     license="MIT",
     extras_require={
-        "test": [
-            "pytest",
-        ],
+        "test": ["pytest"],
     },
     entry_points={
         "console_scripts": [
