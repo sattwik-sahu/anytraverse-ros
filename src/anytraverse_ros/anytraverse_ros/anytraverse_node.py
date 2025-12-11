@@ -14,8 +14,6 @@ from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Float32, Header, String
 
-from anytraverse_interfaces.srv import HumanOperatorCallSrv  # type: ignore
-
 
 class AnyTraverseNode(Node):
     """The AnyTraverse node."""
@@ -75,24 +73,10 @@ class AnyTraverseNode(Node):
             msg_type=Bool, topic="/anytraverse/hoc_req", qos_profile=fast_qos
         )
 
-        # Human operator call service
-        self._hoc_srv = self.create_service(
-            HumanOperatorCallSrv, "human_operator_call", self._hoc_service_callback
-        )  # type: ignore
-
         # Image message buffer for performance boost
         self._latest_msg = None
         self._busy = False
         self._lock = threading.Lock()
-
-    def _hoc_service_callback(self, request, response) -> None:
-        self.get_logger().info(f"HOC >>> {request.human_call_input}")
-        self._anytraverse.human_call(human_input=request.human_call_input)
-        response.updated_prompts = str(self._anytraverse.traversability_preferences)
-        self.get_logger().info(
-            f"Updated prompts: {self._anytraverse.traversability_preferences}"
-        )
-        return response
 
     def _image_callback(self, msg):
         img = self._bridge.compressed_imgmsg_to_cv2(msg)
