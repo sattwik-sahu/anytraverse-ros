@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 import os
 from glob import glob
 
-package_name = "anytraverse_ros"
+package_name = "trav_map_navigation"
 
 setup(
     name=package_name,
@@ -20,11 +20,13 @@ setup(
     description="TODO: Package description",
     license="MIT",
     extras_require={
-        "test": ["pytest"],
+        "test": [
+            "pytest",
+        ],
     },
     entry_points={
         "console_scripts": [
-            "anytraverse_node = anytraverse_ros.anytraverse_node:main",
+            "obstacle_pcl_node = trav_map_navigation.obstacle_pcl_node:main"
         ],
     },
 )

@@ -1,6 +1,0 @@
-launch:
-  - include:
-      file: $(find-pkg-share oakd_ros)/launch/oakd_vio_launch.yaml
-
-  - include:
-      file: $(find-pkg-share anytraverse_ros)/launch/anytraverse_launch.yaml

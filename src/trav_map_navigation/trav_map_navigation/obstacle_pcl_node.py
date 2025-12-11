@@ -8,7 +8,7 @@ import cv2
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 
-class ObstacleCloudProjectorNode(Node):
+class ObstaclePointCloudNode(Node):
     """The obstacle cloud projector node"""
 
     def __init__(self) -> None:
@@ -30,9 +30,7 @@ class ObstacleCloudProjectorNode(Node):
         self._depth_sub = message_filters.Subscriber(
             self, CompressedImage, "/camera/depth/image_raw/compressedDepth"
         )
-        self._trav_sub = message_filters.Subscriber(
-            self, CompressedImage, "/anytraverse/trav_map"
-        )
+        self._trav_sub = message_filters.Subscriber(self, CompressedImage, "/trav_map")
         self._camera_info_sub = message_filters.Subscriber(
             self, CameraInfo, "/camera/color/camera_info"
         )
@@ -52,7 +50,7 @@ class ObstacleCloudProjectorNode(Node):
 
         # Obstacle pointcloud publisher
         self._obst_pcl_pub = self.create_publisher(
-            PointCloud2, "/anytraverse/obstacle_points", qos_profile=qos_profile
+            PointCloud2, "/obstacle_points", qos_profile=qos_profile
         )
 
     def _get_camera_intrinsics(
@@ -152,7 +150,7 @@ class ObstacleCloudProjectorNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ObstacleCloudProjectorNode()
+    node = ObstaclePointCloudNode()
 
     try:
         rclpy.spin(node=node)
