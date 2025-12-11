@@ -135,7 +135,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/yaml-0.2.5-h280c20c_3.conda
       - conda: https://prefix.dev/conda-forge/linux-64/zstd-1.5.7-hb78ec9c_6.conda
       - pypi: https://files.pythonhosted.org/packages/9f/d2/c581486aa6c4fbd7394c23c47b83fa1a919d34194e16944241daf9e762dd/accelerate-1.12.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/dc/6c/4d08c0f9c082d91617ac5d8b979d6945ecc909647e64d3e45c42d92f4c0d/anytraverse-1.0.8-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/39/08/4332bfe1edbe7551172005d60116cea8db8cd032e218e9099d5ef7424e44/anytraverse-1.0.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c0/10/d20b513afe03acc89ec33948320a5544d31f21b05368436d580dec4e234d/charset_normalizer-3.4.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cc/8f/ec6289987824b29529d0dfda0d74a07cec60e54b9c92f3c9da4c0ac732de/contourpy-1.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
@@ -320,7 +320,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/zstd-1.5.7-hbf9d68e_6.conda
       - pypi: https://files.pythonhosted.org/packages/9f/d2/c581486aa6c4fbd7394c23c47b83fa1a919d34194e16944241daf9e762dd/accelerate-1.12.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/dc/6c/4d08c0f9c082d91617ac5d8b979d6945ecc909647e64d3e45c42d92f4c0d/anytraverse-1.0.8-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/39/08/4332bfe1edbe7551172005d60116cea8db8cd032e218e9099d5ef7424e44/anytraverse-1.0.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f3/85/1637cd4af66fa687396e757dec650f28025f2a2f5a5531a3208dc0ec43f2/charset_normalizer-3.4.4-cp312-cp312-macosx_10_13_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/53/3e/405b59cfa13021a56bba395a6b3aca8cec012b45bf177b0eaf7a202cde2c/contourpy-1.3.3-cp312-cp312-macosx_11_0_arm64.whl
@@ -1169,7 +1169,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/zstd-1.5.7-hb78ec9c_6.conda
       - conda: https://prefix.dev/conda-forge/linux-64/zziplib-0.13.69-he45264a_2.conda
       - pypi: https://files.pythonhosted.org/packages/9f/d2/c581486aa6c4fbd7394c23c47b83fa1a919d34194e16944241daf9e762dd/accelerate-1.12.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/dc/6c/4d08c0f9c082d91617ac5d8b979d6945ecc909647e64d3e45c42d92f4c0d/anytraverse-1.0.8-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/39/08/4332bfe1edbe7551172005d60116cea8db8cd032e218e9099d5ef7424e44/anytraverse-1.0.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c0/10/d20b513afe03acc89ec33948320a5544d31f21b05368436d580dec4e234d/charset_normalizer-3.4.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/87/62/9773de14fe6c45c23649e98b83231fffd7b9892b6cf863251dc2afa73643/einops-0.8.1-py3-none-any.whl
@@ -1959,7 +1959,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/osx-arm64/zstd-1.5.7-hbf9d68e_6.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/zziplib-0.13.69-h57f5043_2.conda
       - pypi: https://files.pythonhosted.org/packages/9f/d2/c581486aa6c4fbd7394c23c47b83fa1a919d34194e16944241daf9e762dd/accelerate-1.12.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/dc/6c/4d08c0f9c082d91617ac5d8b979d6945ecc909647e64d3e45c42d92f4c0d/anytraverse-1.0.8-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/39/08/4332bfe1edbe7551172005d60116cea8db8cd032e218e9099d5ef7424e44/anytraverse-1.0.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f3/85/1637cd4af66fa687396e757dec650f28025f2a2f5a5531a3208dc0ec43f2/charset_normalizer-3.4.4-cp312-cp312-macosx_10_13_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/87/62/9773de14fe6c45c23649e98b83231fffd7b9892b6cf863251dc2afa73643/einops-0.8.1-py3-none-any.whl
@@ -2187,10 +2187,10 @@ packages:
   purls: []
   size: 566531
   timestamp: 1744668655747
-- pypi: https://files.pythonhosted.org/packages/dc/6c/4d08c0f9c082d91617ac5d8b979d6945ecc909647e64d3e45c42d92f4c0d/anytraverse-1.0.8-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/39/08/4332bfe1edbe7551172005d60116cea8db8cd032e218e9099d5ef7424e44/anytraverse-1.0.9-py3-none-any.whl
   name: anytraverse
-  version: 1.0.8
-  sha256: d2ba3fc67652265391d318a1f2eec3cf3893c6775110817271bd6aad6bf03a4f
+  version: 1.0.9
+  sha256: 59d984c8cefea2ea36a7b1d5ca03c754fee748715cc3b7a936022fbc64cdb701
   requires_dist:
   - numpy>=1.26.4
   - pillow>=11.2.1

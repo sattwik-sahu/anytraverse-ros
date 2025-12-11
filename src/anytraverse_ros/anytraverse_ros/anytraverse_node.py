@@ -1,9 +1,11 @@
+import asyncio
 import threading
 from threading import Thread
 
 import cv2
 import rclpy
 import torch
+import websockets
 from anytraverse import build_pipeline_from_paper
 from anytraverse.utils.state import TraversalState
 from anytraverse.utils.trav_pref import parse_trav_pref_syntax
@@ -13,7 +15,6 @@ from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Float32, Header, String
-from websockets.sync.server import serve
 
 
 class AnyTraverseNode(Node):
@@ -184,33 +185,45 @@ class AnyTraverseNode(Node):
         self._trav_pref_pub.publish(trav_pref_msg)
 
 
+async def websocket_handler(node: AnyTraverseNode, websocket):
+    async for message in websocket:
+        if message == "ok":
+            # node._anytraverse.human_call(human_input="")
+            node._anytraverse.register_scene()
+        else:
+            try:
+                node._anytraverse.human_call(human_input=message)
+            except Exception:
+                print("Invalid syntax for human operator call.")
+
+
+async def websocket_main(node):
+    async with websockets.serve(
+        lambda ws: websocket_handler(node, ws), "0.0.0.0", 7777
+    ):
+        # run forever
+        await asyncio.Future()
+
+
 def main():
     rclpy.init()
     node = AnyTraverseNode()
 
-    def _human_operator_call_handler(websocket) -> None:
-        for message in websocket:
-            if message == "ok":
-                node._anytraverse.human_call(human_input="")
-            else:
-                try:
-                    node._anytraverse.human_call(human_input=message)
-                except Exception:
-                    print(
-                        "Error reading the human operator call. Please follow the syntax."
-                    )
+    # Run WebSocket server in a background event loop thread
+    def ws_thread_func():
+        asyncio.run(websocket_main(node))
 
-    with serve(_human_operator_call_handler, "0.0.0.0", 7777) as server:
-        server_thread = Thread(target=server.serve_forever, daemon=True)
-        try:
-            server_thread.start()
-            rclpy.spin(node)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            server_thread.join()
-            node.destroy_node()
-            rclpy.shutdown()
+    ws_thread = threading.Thread(target=ws_thread_func, daemon=True)
+    ws_thread.start()
+
+    # Run ROS2 normally
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == "__main__":
