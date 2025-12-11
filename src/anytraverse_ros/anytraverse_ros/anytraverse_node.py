@@ -13,6 +13,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Float32, Header, String
+from websockets.sync.server import serve
 
 
 class AnyTraverseNode(Node):
@@ -22,7 +23,7 @@ class AnyTraverseNode(Node):
         super().__init__(node_name="anytraverse_node", namespace="/anytraverse")
 
         # Fast QoS
-        fast_qos = QoSProfile(
+        qos_profile = QoSProfile(
             depth=1,
             reliability=QoSReliabilityPolicy.RELIABLE,
             history=QoSHistoryPolicy.KEEP_LAST,
@@ -45,7 +46,7 @@ class AnyTraverseNode(Node):
         self._image_sub = self.create_subscription(
             msg_type=CompressedImage,
             topic="/camera/color/image_raw/compressed",
-            qos_profile=fast_qos,
+            qos_profile=qos_profile,
             callback=self._image_callback,
         )
 
@@ -53,24 +54,27 @@ class AnyTraverseNode(Node):
         self._trav_map_pub = self.create_publisher(
             msg_type=CompressedImage,
             topic="/anytraverse/trav_map",
-            qos_profile=fast_qos,
+            qos_profile=qos_profile,
         )
         self._unc_map_pub = self.create_publisher(
             msg_type=CompressedImage,
             topic="/anytraverse/unc_map",
-            qos_profile=fast_qos,
+            qos_profile=qos_profile,
         )
         self._roi_trav_pub = self.create_publisher(
-            msg_type=Float32, topic="/anytraverse/roi/trav", qos_profile=fast_qos
+            msg_type=Float32, topic="/anytraverse/roi/trav", qos_profile=qos_profile
         )
         self._roi_unc_pub = self.create_publisher(
-            msg_type=Float32, topic="/anytraverse/roi/unc", qos_profile=fast_qos
+            msg_type=Float32, topic="/anytraverse/roi/unc", qos_profile=qos_profile
         )
         self._trav_state_pub = self.create_publisher(
-            msg_type=String, topic="/anytraverse/state", qos_profile=fast_qos
+            msg_type=String, topic="/anytraverse/state", qos_profile=qos_profile
         )
         self._hoc_req_pub = self.create_publisher(
-            msg_type=Bool, topic="/anytraverse/hoc_req", qos_profile=fast_qos
+            msg_type=Bool, topic="/anytraverse/hoc_req", qos_profile=qos_profile
+        )
+        self._trav_pref_pub = self.create_publisher(
+            msg_type=String, topic="/anytraverse/trav_pref", qos_profile=qos_profile
         )
 
         # Image message buffer for performance boost
@@ -138,46 +142,75 @@ class AnyTraverseNode(Node):
                 img = (img * 255).clip(0, 255).astype("uint8")
             return img
 
+        # Convert traversability and uncertainty maps to numpy
         trav_np = to_uint8_img(trav_map)
         unc_np = to_uint8_img(unc_map)
 
-        # now = self.get_clock().now().to_msg()
-        # header = Header(stamp=now, frame_id="camera_link")
-
+        # Compress the traversability and uncertainty maps
         trav_map_msg = self._bridge.cv2_to_compressed_imgmsg(trav_np, dst_format="jpg")
         unc_map_msg = self._bridge.cv2_to_compressed_imgmsg(unc_np, dst_format="jpg")
         trav_map_msg.header = incoming_header
         unc_map_msg.header = incoming_header
+
+        # Publish maps
         self._trav_map_pub.publish(trav_map_msg)
         self._unc_map_pub.publish(unc_map_msg)
 
+        # ROI specific statistics
+        # 1. Traversability in ROI
         roi_trav_msg = Float32()
         roi_trav_msg.data = roi_trav
         self._roi_trav_pub.publish(roi_trav_msg)
 
+        # 2. Uncertainty in ROI
         roi_unc_msg = Float32()
         roi_unc_msg.data = roi_unc
         self._roi_unc_pub.publish(roi_unc_msg)
 
+        # Traversal state (unseen scene/unknown object/ok)
         trav_state_msg = String()
         trav_state_msg.data = trav_state
         self._trav_state_pub.publish(trav_state_msg)
 
+        # Is a human operator call required? (if state not ok)
         hoc_req_msg = Bool()
         hoc_req_msg.data = hoc_req
         self._hoc_req_pub.publish(hoc_req_msg)
+
+        # Publish the traversability preferences
+        # These are updated through human operator calls and memory hits
+        trav_pref_msg = String()
+        trav_pref_msg.data = str(self._anytraverse.traversability_preferences)
+        self._trav_pref_pub.publish(trav_pref_msg)
 
 
 def main():
     rclpy.init()
     node = AnyTraverseNode()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
+
+    def _human_operator_call_handler(websocket) -> None:
+        for message in websocket:
+            if message == "ok":
+                node._anytraverse.human_call(human_input="")
+            else:
+                try:
+                    node._anytraverse.human_call(human_input=message)
+                except Exception:
+                    print(
+                        "Error reading the human operator call. Please follow the syntax."
+                    )
+
+    with serve(_human_operator_call_handler, "0.0.0.0", 7777) as server:
+        server_thread = Thread(target=server.serve_forever, daemon=True)
+        try:
+            server_thread.start()
+            rclpy.spin(node)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            server_thread.join()
+            node.destroy_node()
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":

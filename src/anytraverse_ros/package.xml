@@ -4,14 +4,12 @@
   <name>anytraverse_ros</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sattwik21@iiserb.ac.in">moonlab</maintainer>
+  <maintainer email="sattwik21@iiserb.ac.in">Sattwik Sahu</maintainer>
   <license>MIT</license>
 
   <exec_depend>rclpy</exec_depend> 
   
-  <exec_depend>anytraverse_interfaces</exec_depend>
 
-  <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>ros2launch</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
