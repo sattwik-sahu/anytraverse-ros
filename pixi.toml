@@ -10,6 +10,7 @@ scripts = ["install/setup.bash"]
 
 [feature.build.target.unix.tasks]
 build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY"
+cbuild = "rm -rf build/ install/ log && pixi run build"
 
 # Dependencies used by all environments
 [dependencies]
@@ -55,7 +56,10 @@ channels = ["https://prefix.dev/robostack-jazzy"]
 [feature.jazzy.dependencies]
 ros-jazzy-desktop = "*"
 ros-jazzy-navigation2 = "*"
+ros-jazzy-nav2-costmap-2d = "*"
+ros-jazzy-nav2-bringup = "*"
 ros-jazzy-foxglove-bridge = "*"
 ros-jazzy-compressed-depth-image-transport = "*"
 ros-jazzy-compressed-image-transport = "*"
 ros-jazzy-message-filters = "*"
+ros-jazzy-slam-toolbox = "*"
