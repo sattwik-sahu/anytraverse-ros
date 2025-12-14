@@ -4,6 +4,9 @@ description = "Development environment for RoboStack ROS packages"
 channels = ["https://prefix.dev/conda-forge"]
 platforms = ["linux-64", "osx-arm64"]
 
+[activation.env]
+RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
+
 # For activation scripts, we use bash for Unix-like systems
 [target.unix.activation]
 scripts = ["install/setup.bash"]
@@ -62,3 +65,4 @@ ros-jazzy-foxglove-bridge = "*"
 ros-jazzy-compressed-depth-image-transport = "*"
 ros-jazzy-compressed-image-transport = "*"
 ros-jazzy-message-filters = "*"
+ros-jazzy-rmw-cyclonedds-cpp = "*"
