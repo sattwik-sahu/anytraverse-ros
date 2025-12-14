@@ -18,6 +18,3 @@ launch:
           to: "/anytraverse/trav_map"
         - from: "/obstacle_points"
           to: "/anytraverse/obstacle_points"
-
-  # - include:
-  #     file: $(find-pkg-share trav_map_navigation)/launch/navigation_launch.yaml 
