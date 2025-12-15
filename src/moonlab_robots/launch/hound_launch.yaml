@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+launch:
+  - node:
+      pkg: "moonlab_robots"
+      exec: "hound_controller"
+      name: "hound_controller"
+      remap:
+        - from: "/cmd_vel"
+          to: "/anytraverse/cmd_vel"

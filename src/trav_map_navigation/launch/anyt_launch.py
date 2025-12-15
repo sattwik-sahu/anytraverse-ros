@@ -44,7 +44,15 @@ def generate_launch_description():
         output="screen",
     )
 
-    # 3. Start the 'obstacle_pcl_node' with remappings
+    # 3. Start the 'anytraverse_node'
+    anytraverse_node = Node(
+        package="anytraverse_ros",
+        executable="cmd_vel_gating_node",
+        name="cmd_vel_gating",
+        output="screen",
+    )
+
+    # 4. Start the 'obstacle_pcl_node' with remappings
     obstacle_pcl_node = Node(
         package="trav_map_navigation",
         executable="obstacle_pcl_node",

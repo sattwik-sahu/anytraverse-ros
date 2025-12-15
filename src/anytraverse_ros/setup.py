@@ -25,6 +25,7 @@ setup(
     entry_points={
         "console_scripts": [
             "anytraverse_node = anytraverse_ros.anytraverse_node:main",
+            "cmd_vel_gating_node = anytraverse_ros.cmd_vel_gating:main",
         ],
     },
 )

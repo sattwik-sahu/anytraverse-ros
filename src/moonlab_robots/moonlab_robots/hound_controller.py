@@ -35,7 +35,7 @@ class HoundController(Node):
             callback=self._send_command,
             qos_profile=10,
         )
-        self.get_logger().info("Subscribed to /cmd_vel")
+        self.get_logger().info(f"Subscribed to {self._cmd_vel_sub.topic}")
 
     def _send_command(self, msg: Twist) -> None:
         """Callback that runs every time a Twist message is received."""
