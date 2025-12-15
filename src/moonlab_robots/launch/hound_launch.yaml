@@ -1,10 +1,20 @@
 %YAML 1.2
 ---
 launch:
+  - arg:
+      name: "connection_str"
+      default: "/dev/ttyUSB0"
+  - arg:
+      name: "cmd_vel_topic"
+      default: "/cmd_vel"
+
   - node:
       pkg: "moonlab_robots"
       exec: "hound_controller"
       name: "hound_controller"
+      param:
+        - name: "connection_str"
+          value: "$(var connection_str)"
       remap:
         - from: "/cmd_vel"
-          to: "/anytraverse/cmd_vel"
+          to: "$(var cmd_vel)"
