@@ -1,6 +1,7 @@
 import os
+
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, SetRemap
@@ -12,7 +13,7 @@ def generate_launch_description():
     nav2_bringup_pkg = FindPackageShare("nav2_bringup")
 
     default_params_file = PathJoinSubstitution(
-        [trav_map_nav_pkg, "config", "nav2_params.yaml"]
+        [trav_map_nav_pkg, "config", "nav", "params.yaml"]
     )
 
     # ARGS
