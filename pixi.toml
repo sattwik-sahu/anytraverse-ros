@@ -5,7 +5,8 @@ channels = ["https://prefix.dev/conda-forge"]
 platforms = ["linux-64", "osx-arm64"]
 
 [target.osx-arm64.activation.env]
-RMW_IMPLEMENTATION = "rmw_cyclonedds_cpp"
+RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
+KMP_DUPLICATE_LIB_OK = "TRUE"
 
 # For activation scripts, we use bash for Unix-like systems
 [target.unix.activation]
@@ -38,7 +39,7 @@ libgl-devel = "*"
 jazzy = { features = ["jazzy", "build"] }
 
 [pypi-dependencies]
-torch = ">=2.9.1, <3"
+torch = ">=2.7.1, <3"
 torchvision = ">=0.24.1, <0.25"
 transformers = ">=4.57.3, <5"
 einops = ">=0.8.1, <0.9"
@@ -66,4 +67,5 @@ ros-jazzy-foxglove-bridge = "*"
 ros-jazzy-compressed-depth-image-transport = "*"
 ros-jazzy-compressed-image-transport = "*"
 ros-jazzy-message-filters = "*"
-ros-jazzy-rmw-cyclonedds-cpp = "*"
+# ros-jazzy-rmw-cyclonedds-cpp = "*"
+ros-jazzy-rmw-zenoh-cpp = "*"

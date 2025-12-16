@@ -45,7 +45,7 @@ def generate_launch_description():
     )
 
     # 3. Start the 'anytraverse_node'
-    anytraverse_node = Node(
+    cmd_vel_gating_node = Node(
         package="anytraverse_ros",
         executable="cmd_vel_gating_node",
         name="cmd_vel_gating",
@@ -93,5 +93,6 @@ def generate_launch_description():
             anytraverse_node,
             obstacle_pcl_node,
             navigation_launch,
+            cmd_vel_gating_node,
         ]
     )

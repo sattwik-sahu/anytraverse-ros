@@ -8,7 +8,6 @@ import torch
 import websockets
 from anytraverse import build_pipeline_from_paper
 from anytraverse.utils.state import TraversalState
-from anytraverse.utils.trav_pref import parse_trav_pref_syntax
 from cv_bridge import CvBridge
 from PIL import Image as PILImage
 from rclpy.node import Node
