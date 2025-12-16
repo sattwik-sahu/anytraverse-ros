@@ -5,16 +5,17 @@ channels = ["https://prefix.dev/conda-forge"]
 platforms = ["linux-64", "osx-arm64"]
 
 [target.osx-arm64.activation.env]
-RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
 KMP_DUPLICATE_LIB_OK = "TRUE"
 
 # For activation scripts, we use bash for Unix-like systems
 [target.unix.activation]
 scripts = ["install/setup.bash"]
+env = { "RMW_IMPLEMENTATION" = "rmw_zenoh_cpp" }
 
 [feature.build.target.unix.tasks]
 build = "colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPython_FIND_VIRTUALENV=ONLY -DPython3_FIND_VIRTUALENV=ONLY"
 cbuild = "rm -rf build/ install/ log && pixi run build"
+zenohd = "ros2 run rmw_zenoh_cpp rmw_zenohd"
 
 # Dependencies used by all environments
 [dependencies]

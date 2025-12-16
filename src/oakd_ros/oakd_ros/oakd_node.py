@@ -31,7 +31,7 @@ class OakdVIO_Node(Node):
 
         qos_profile = QoSProfile(
             depth=1,
-            reliability=QoSReliabilityPolicy.RELIABLE,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
         )
 
