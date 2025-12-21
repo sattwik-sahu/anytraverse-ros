@@ -39,7 +39,12 @@ ROS Package for offroad navigation with [AnyTraverse](https://github.com/sattwik
     git clone git@github.com:sattwik-sahu/anytraverse_ros.git   # SSH
     gh repo clone sattwik-sahu/anytraverse_ros   # GH CLI
     ```
-
+- Install the pixi dependencies
+    ```bash
+    pixi update
+    pixi install
+    pixi install -e jazzy
+    ```
 - Build the packages.
     ```bash
     pixi run build
