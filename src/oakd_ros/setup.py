@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 import os
 from glob import glob
 
-package_name = "anytraverse_ros"
+package_name = "oakd_ros"
 
 setup(
     name=package_name,
@@ -20,12 +20,11 @@ setup(
     description="TODO: Package description",
     license="MIT",
     extras_require={
-        "test": ["pytest"],
+        "test": [
+            "pytest",
+        ],
     },
     entry_points={
-        "console_scripts": [
-            "anytraverse_node = anytraverse_ros.anytraverse_node:main",
-            "cmd_vel_gating_node = anytraverse_ros.cmd_vel_gating:main",
-        ],
+        "console_scripts": ["oakd_node = oakd_ros.oakd_node:main"],
     },
 )

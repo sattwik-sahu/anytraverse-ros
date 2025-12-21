@@ -1,0 +1,20 @@
+%YAML 1.2
+---
+launch:
+  - include:
+      file: $(find-pkg-share oakd_ros)/launch/oakd_vio_launch.yaml
+
+  - node:
+      pkg: "anytraverse_ros"
+      exec: "anytraverse_node"
+      name: "anytraverse"
+
+  - node:
+      pkg: "trav_map_navigation"
+      exec: "obstacle_pcl_node"
+      name: "obstacle_pcl"
+      remap:
+        - from: "/trav_map"
+          to: "/anytraverse/trav_map"
+        - from: "/obstacle_points"
+          to: "/anytraverse/obstacle_points"

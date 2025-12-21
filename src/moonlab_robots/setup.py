@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
-import os
 from glob import glob
+import os
 
-package_name = "anytraverse_ros"
+package_name = "moonlab_robots"
 
 setup(
     name=package_name,
@@ -18,14 +18,8 @@ setup(
     maintainer="moonlab",
     maintainer_email="sattwik21@iiserb.ac.in",
     description="TODO: Package description",
-    license="MIT",
-    extras_require={
-        "test": ["pytest"],
-    },
+    license="Apache-2.0",
     entry_points={
-        "console_scripts": [
-            "anytraverse_node = anytraverse_ros.anytraverse_node:main",
-            "cmd_vel_gating_node = anytraverse_ros.cmd_vel_gating:main",
-        ],
+        "console_scripts": ["hound_controller = moonlab_robots.hound_controller:main"],
     },
 )

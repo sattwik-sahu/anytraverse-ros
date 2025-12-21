@@ -1,14 +1,16 @@
-from anytraverse_ros.oakd_vio_zmq._typing import (
-    RGBD_VIO_Metadata,
-    RGBD_VIO_Message,
-    NDArrayMetadata,
+import numpy as np
+import ormsgpack
+from numpy import typing as npt
+
+from oakd_ros._typing import (
+    DepthMap,
     Image,
+    NDArrayMetadata,
     Pointcloud,
+    RGBD_VIO_Message,
+    RGBD_VIO_Metadata,
     TransformationMatrix,
 )
-import numpy as np
-from numpy import typing as npt
-import ormsgpack
 
 
 def create_ndarray_metadata(array: npt.NDArray) -> NDArrayMetadata:
@@ -25,13 +27,14 @@ def create_ndarray_metadata(array: npt.NDArray) -> NDArrayMetadata:
 
 
 def create_metadata(
-    rgb: Image, pointcloud: Pointcloud, transform: TransformationMatrix
+    rgb: Image, depth: DepthMap, pointcloud: Pointcloud, transform: TransformationMatrix
 ) -> RGBD_VIO_Metadata:
     """
     Creates an RGBD VIO message metadata.
 
     Args:
         rgb (Image): The RGB image. Shape: `(H, W, 3)`
+        depth (DepthMap): The depth map. Shape: `(H, W)`
         pointcloud (Pointcloud): The pointcloud aligned to the image pixels.
             Shape: `(N, 3)`
         transform (TransformationMatrix): The camera to world transformation
@@ -48,6 +51,7 @@ def create_metadata(
     """
     return RGBD_VIO_Metadata(
         rgb=create_ndarray_metadata(array=rgb),
+        depth=create_ndarray_metadata(array=depth),
         pointcloud=create_ndarray_metadata(array=pointcloud),
         transform=create_ndarray_metadata(array=transform),
     )
@@ -60,12 +64,14 @@ def parse_ndarray_buffer(frame: bytes, metadata: NDArrayMetadata) -> npt.NDArray
 def parse_message(
     metadata_bytes: bytes,
     rgb_frame: bytes,
+    depth_frame: bytes,
     pointcloud_frame: bytes,
     transform_frame: bytes,
 ) -> RGBD_VIO_Message:
     metadata: RGBD_VIO_Metadata = ormsgpack.unpackb(metadata_bytes)
     return RGBD_VIO_Message(
         rgb=parse_ndarray_buffer(frame=rgb_frame, metadata=metadata["rgb"]),
+        depth=parse_ndarray_buffer(frame=depth_frame, metadata=metadata["depth"]),
         pointcloud=parse_ndarray_buffer(
             frame=pointcloud_frame, metadata=metadata["pointcloud"]
         ),

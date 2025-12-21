@@ -4,8 +4,7 @@ from typing import TypedDict
 import numpy as np
 from numpy import typing as npt
 
-# Float = np.float64
-Float = np.float32
+Float = np.float64
 """A 64-bit floating point number"""
 
 Image = npt.NDArray[np.uint8]
@@ -15,6 +14,10 @@ Pointcloud = npt.NDArray[Float]
 """A pointcloud containing points as 64-bit floating point numbers"""
 
 TransformationMatrix = npt.NDArray[Float]
+"""The transformation matrix from current pose to starting pose"""
+
+DepthMap = npt.NDArray[np.uint16]
+"""The depth map of the current view in the camera"""
 
 
 class NDArrayMetadata(TypedDict):
@@ -28,6 +31,7 @@ class RGBD_VIO_Metadata(TypedDict):
     """Metadata for an RGBD VIO message"""
 
     rgb: NDArrayMetadata
+    depth: NDArrayMetadata
     pointcloud: NDArrayMetadata
     transform: NDArrayMetadata
 
@@ -35,5 +39,6 @@ class RGBD_VIO_Metadata(TypedDict):
 @dataclass
 class RGBD_VIO_Message:
     rgb: Image
+    depth: DepthMap
     pointcloud: Pointcloud
     transform: TransformationMatrix
