@@ -88,6 +88,10 @@ pixi run ros2 launch foxglove_bridge foxglove_bridge_launch.xml
 > [!TIP]
 > To view your robot topics on the base station, you must set the `ROS_DOMAIN_ID` on both machines. See [this guide](docs/comm_base.md) for more information.
 
+### Deploying on Real Robots
+
+To see how to deploy on MOON Lab robots, see [this guide](docs/robot.md).
+
 ## Contribution
 
 Please feel free to open and issue if you spot a bug or want to request a feature.

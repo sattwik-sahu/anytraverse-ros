@@ -2,6 +2,7 @@ import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
 from rhino import init_hound as init_hound_controller
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 
 class HoundController(Node):
@@ -9,6 +10,13 @@ class HoundController(Node):
 
     def __init__(self) -> None:
         super().__init__(node_name="hound_controller")
+
+        # QoS Profile
+        qos_profile = QoSProfile(
+            depth=1,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+        )
 
         # 1. Get connection string parameter
         self.declare_parameter(name="connection_str", value="/dev/ttyUSB0")
@@ -33,7 +41,7 @@ class HoundController(Node):
             msg_type=Twist,
             topic="/cmd_vel",
             callback=self._send_command,
-            qos_profile=10,
+            qos_profile=qos_profile,
         )
         self.get_logger().info(f"Subscribed to {self._cmd_vel_sub.topic}")
 
@@ -46,9 +54,18 @@ class HoundController(Node):
             # Map ROS Twist messages to the robot's hardware API
             # Note: You were inverting angular.z in your snippet (-msg.angular.z),
             # ensuring this aligns with your robot's steering direction (Left vs Right).
-            self._controller.send_velocity_cmd(
-                throttle=msg.linear.x, steering=-msg.angular.z
+            feedback = self._controller.send_velocity_cmd(
+                throttle=msg.linear.x,
+                steering=-msg.angular.z,
             )
+
+            # Log the robot feedback values
+            self.get_logger().info(
+                f"PWM values: throttle={feedback['throttle_pwm']} | steering={feedback['steering_pwm']}"
+            )
+
+            if msg.linear.x == msg.angular.z == 0:
+                self._controller.apply_brake()
         except Exception as e:
             self.get_logger().warn(f"Hardware communication error: {e}")
 
