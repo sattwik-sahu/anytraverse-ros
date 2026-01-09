@@ -13,7 +13,7 @@ def generate_launch_description():
     nav2_bringup_pkg = FindPackageShare("nav2_bringup")
 
     default_params_file = PathJoinSubstitution(
-        [trav_map_nav_pkg, "config", "nav", "params.yaml"]
+        [trav_map_nav_pkg, "config", "nav", "params_default.yaml"]
     )
 
     # ARGS
@@ -27,6 +27,12 @@ def generate_launch_description():
         "params_file",
         default_value=default_params_file,
         description="Path to nav2 params file",
+    )
+
+    robot_params_file_arg = DeclareLaunchArgument(
+        "robot_params_file",
+        # default_value=default_params_file,
+        description="Path to robot params file",
     )
 
     # Added this arg for easy switching to Webots later
@@ -66,5 +72,12 @@ def generate_launch_description():
     )
 
     return LaunchDescription(
-        [obstacle_topic_arg, params_file_arg, sim_time_arg, tf_fix_node, nav2_group]
+        [
+            obstacle_topic_arg,
+            params_file_arg,
+            robot_params_file_arg,
+            sim_time_arg,
+            tf_fix_node,
+            nav2_group,
+        ]
     )
