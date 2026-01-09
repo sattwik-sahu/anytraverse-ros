@@ -15,5 +15,5 @@ then run
 ros2 launch moonlab_robots hound_launch.yaml connection_str:=$MAVPROXY_CONNECTION_STR cmd_vel_topic:=/anytraverse/cmd_vel
 ```
 
-> [!TIP] Tip
+> [!TIP]
 > When working with MOON Lab robots in other frameworks, you may change the `cmd_vel_topic` argument to the relevant topics.
