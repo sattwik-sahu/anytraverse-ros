@@ -32,10 +32,10 @@ class AnyTraverseNode(Node):
         # Build the AnyTraverse pipeline
         self.get_logger().info("Building AnyTraverse pipeline")
         self._anytraverse = build_pipeline_from_paper(
-            init_traversabilty_preferences={"floor": 1.0},
-            ref_scene_similarity_threshold=0.85,
+            init_traversabilty_preferences={"grass": 1.0},
+            ref_scene_similarity_threshold=0.80,
             roi_uncertainty_threshold=0.3,
-            roi_x_bounds=(0.33, 0.67),
+            roi_x_bounds=(0.25, 0.75),
             roi_y_bounds=(0.67, 0.95),
         )
 
