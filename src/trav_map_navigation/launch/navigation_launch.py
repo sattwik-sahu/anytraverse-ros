@@ -29,11 +29,11 @@ def generate_launch_description():
         description="Path to nav2 params file",
     )
 
-    robot_params_file_arg = DeclareLaunchArgument(
-        "robot_params_file",
-        # default_value=default_params_file,
-        description="Path to robot params file",
-    )
+    # robot_params_file_arg = DeclareLaunchArgument(
+    #     "robot_params_file",
+    #     # default_value=default_params_file,
+    #     description="Path to robot params file",
+    # )
 
     # Added this arg for easy switching to Webots later
     sim_time_arg = DeclareLaunchArgument(
@@ -75,7 +75,7 @@ def generate_launch_description():
         [
             obstacle_topic_arg,
             params_file_arg,
-            robot_params_file_arg,
+            # robot_params_file_arg,
             sim_time_arg,
             tf_fix_node,
             nav2_group,
