@@ -66,6 +66,8 @@ class HoundController(Node):
 
             if msg.linear.x == msg.angular.z == 0:
                 self._controller.apply_brake()
+            else:
+                self._controller.release_brake()
         except Exception as e:
             self.get_logger().warn(f"Hardware communication error: {e}")
 
