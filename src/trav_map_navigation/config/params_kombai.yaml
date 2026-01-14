@@ -13,12 +13,12 @@ controller_server:
   ros__parameters:
     use_sim_time: False
     controller_frequency: 10.0
-    min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.5
+    min_x_velocity_threshold: 0.01
+    min_y_velocity_threshold: 0.01
     min_theta_velocity_threshold: 0.001
-    failure_tolerance: 0.3
+    failure_tolerance: 0.5
     progress_checker_plugin: "progress_checker"
-    goal_checker_plugins: ["general_goal_checker"] 
+    goal_checker_plugins: ["general_goal_checker"]
     controller_plugins: ["FollowPath"]
 
     # Progress checker: Stops robot if it hasn't moved 0.5m in 10s
@@ -26,14 +26,14 @@ controller_server:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
       movement_time_allowance: 60.0
-    
+
     # Goal checker: How close is "close enough"?
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
       yaw_goal_tolerance: 0.25
-    
+
     # Controller (DWB is standard, MPPI is better for irregular obstacles if you have GPU)
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
@@ -47,8 +47,17 @@ controller_server:
       max_speed_xy: 0.5
       min_speed_theta: 0.0
       # Add critics (scoring functions)
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
-      BaseObstacle.scale: 0.02
+      critics:
+        [
+          "RotateToGoal",
+          "Oscillation",
+          "BaseObstacle",
+          "GoalAlign",
+          "PathAlign",
+          "PathDist",
+          "GoalDist",
+        ]
+      BaseObstacle.scale: 1.0
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 24.0
@@ -57,7 +66,7 @@ controller_server:
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
-      Oscillation.scale: 1.0
+      Oscillation.scale: 1.25
 
 local_costmap:
   local_costmap:
@@ -78,7 +87,7 @@ local_costmap:
         enabled: True
         observation_sources: pointcloud_sensor
         pointcloud_sensor:
-          topic: /obstacle_points  # <--- MUST MATCH the 'src' in launch file remapping
+          topic: /obstacle_points
           max_obstacle_height: 2.0
           min_obstacle_height: 0.0
           obstacle_range: 2.5
@@ -86,24 +95,24 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "PointCloud2"
-      
+
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.35
+        inflation_radius: 0.2
 
 global_costmap:
   global_costmap:
     ros__parameters:
       update_frequency: 1.0
       publish_frequency: 1.0
-      global_frame: odom      # <--- Key change: Use odom for global planning
+      global_frame: odom # <--- Key change: Use odom for global planning
       robot_base_frame: base_link
-      rolling_window: true    # <--- Key change: Map moves with robot
+      rolling_window: true # <--- Key change: Map moves with robot
       width: 20
       height: 20
       resolution: 0.05
-      footprint: "[ [0.5, 0.2], [0.5, -0.2], [-0.5, -0.2], [-0.5, 0.2] ]"
+      footprint: "[ [0.325, 0.15], [0.325, -0.15], [-0.325, -0.15], [-0.325, 0.15] ]"
       plugins: ["obstacle_layer", "inflation_layer"]
 
       obstacle_layer:
@@ -114,8 +123,8 @@ global_costmap:
           topic: /obstacle_points
           max_obstacle_height: 2.0
           min_obstacle_height: 0.0
-          obstacle_range: 2.5
-          raytrace_range: 3.0
+          obstacle_range: 5.0
+          raytrace_range: 5.0
           clearing: True # Since we have no static map, clearing is vital to remove old obstacles
           marking: True
           data_type: "PointCloud2"
@@ -132,7 +141,7 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner::NavfnPlanner"
-      tolerance: 0.5
+      tolerance: 0.25
       use_astar: false
       allow_unknown: true # <--- Critical: Allows planning into the unknown (black) space
 
@@ -168,7 +177,7 @@ collision_monitor:
     transform_tolerance: 0.2
     source_timeout: 5.0
     stop_pub_count: 2
-    
+
     # Define the sensing sources
     observation_sources: ["pointcloud_source"]
     pointcloud_source:
@@ -183,7 +192,7 @@ collision_monitor:
     PolygonStop:
       type: "polygon"
       # Define a 0.6m x 0.6m stop box centered on the robot
-      points: "[[0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3]]"
+      points: "[[0.3, 0.14], [0.3, -0.14], [-0.3, -0.14], [-0.3, 0.14]]"
       action_type: "stop"
       min_points: 4
       visualize: True
@@ -193,11 +202,11 @@ velocity_smoother:
   ros__parameters:
     smoothing_frequency: 20.0
     scale_velocities: False
-    feedback: "OPEN_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
-    max_velocity: [0.22, 0.0, 1.0] # x, y, theta
-    min_velocity: [-0.22, 0.0, -1.0]
-    max_accel: [2.5, 0.0, 3.2]
-    max_decel: [-2.5, 0.0, -3.2]
+    feedback: "CLOSED_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
+    max_velocity: [0.5, 0.0, 1.57] # x, y, theta
+    min_velocity: [0.05, 0.0, 0.1]
+    max_accel: [1.5, 0.0, 2.0]
+    max_decel: [-1.5, 0.0, -2.0]
     odom_topic: "odom"
     robot_base_frame: "base_link"
 
@@ -217,9 +226,9 @@ docking_server:
     dock_prestaging_tolerance: 0.5
 
     # Types of docks
-    dock_plugins: ['simple_charging_dock']
+    dock_plugins: ["simple_charging_dock"]
     simple_charging_dock:
-      plugin: 'opennav_docking::SimpleChargingDock'
+      plugin: "opennav_docking::SimpleChargingDock"
       docking_threshold: 0.05
       staging_x_offset: -0.7
       use_external_detection_pose: true
