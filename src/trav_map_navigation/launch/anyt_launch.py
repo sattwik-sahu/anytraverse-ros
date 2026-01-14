@@ -12,10 +12,12 @@ from launch.substitutions import (
     PathJoinSubstitution,
 )
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
     trav_map_navigation_share_dir = get_package_share_directory("trav_map_navigation")
+    anytraverse_share_dir = get_package_share_directory("anytraverse_ros")
 
     # Args
     obstacle_topic_arg = DeclareLaunchArgument(
@@ -23,8 +25,17 @@ def generate_launch_description():
         default_value="/anytraverse/obstacle_points",
         description="Topic to remap for obstacle avoidance",
     )
-    robot_name_arg = DeclareLaunchArgument(
-        "robot_name", default_value="default", description="Name of the robot to launch"
+    trav_map_topic_arg = DeclareLaunchArgument(
+        "trav_map_topic",
+        default_value="/anytraverse/trav_map",
+        description="Topic to remap for traversability map",
+    )
+    robot_arg = DeclareLaunchArgument(
+        "robot", default_value="default", description="Name of the robot to launch"
+    )
+    init_prompt_arg = DeclareLaunchArgument(
+        name="init_prompt",
+        description="Initial prompts for the AnyTraverse pipeline",
     )
 
     # 1. Include the OAK-D VIO launch file
@@ -37,11 +48,26 @@ def generate_launch_description():
     )
 
     # 2. Start the 'anytraverse_node'
+    anytraverse_params_file_path = PathJoinSubstitution(
+        [
+            anytraverse_share_dir,
+            "config",
+            ["params_", LaunchConfiguration("robot"), ".yaml"],
+        ]
+    )
     anytraverse_node = Node(
         package="anytraverse_ros",
         executable="anytraverse_node",
-        name="anytraverse",
+        name="anytraverse_node",
         output="screen",
+        parameters=[
+            anytraverse_params_file_path,
+            {
+                "init_prompt": ParameterValue(
+                    LaunchConfiguration("init_prompt"), value_type=str
+                )
+            },
+        ],
     )
 
     # 3. Start the 'anytraverse_node'
@@ -59,7 +85,7 @@ def generate_launch_description():
         name="obstacle_pcl",
         output="screen",
         remappings=[
-            ("/trav_map", "/anytraverse/trav_map"),
+            ("/trav_map", LaunchConfiguration("trav_map_topic")),
             ("/obstacle_points", LaunchConfiguration("obstacle_topic")),
         ],
     )
@@ -68,27 +94,27 @@ def generate_launch_description():
     navigation_launch_path = os.path.join(
         trav_map_navigation_share_dir, "launch", "navigation_launch.py"
     )
-
-    params_file_path = PathJoinSubstitution(
+    nav_params_file_path = PathJoinSubstitution(
         [
             trav_map_navigation_share_dir,
-            "config",  # Adjust this if your params are not in a 'config' subfolder
-            ["params_", LaunchConfiguration("robot_name"), ".yaml"],
+            "config",
+            ["params_", LaunchConfiguration("robot"), ".yaml"],
         ]
     )
-
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(navigation_launch_path),
         launch_arguments={
             "obstacle_topic": LaunchConfiguration("obstacle_topic"),
-            "params_file": params_file_path,
+            "params_file": nav_params_file_path,
         }.items(),
     )
 
     return LaunchDescription(
         [
             obstacle_topic_arg,
-            robot_name_arg,
+            trav_map_topic_arg,
+            robot_arg,
+            init_prompt_arg,
             oakd_vio_launch,
             anytraverse_node,
             obstacle_pcl_node,
