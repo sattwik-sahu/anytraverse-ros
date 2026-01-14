@@ -76,7 +76,7 @@ Once the OAK-D camera has been started, run the following commands in a terminal
     ```bash
     pixi run ros2 launch trav_map_navigation anyt_launch.yaml robot:="${ROBOT_NAME}" init_prompt:="${INIT_PROMPT}"
     ```
-    - `$ROBOT_NAME` is the name of the robot you wish to run the navigation on. To create your own robot configuration, follow this guide.
+    - `$ROBOT_NAME` is the name of the robot you wish to run the navigation on. To create your own robot configuration, follow [this guide](docs/robot.md#bring-your-own-robot).
     - `$INIT_PROMPT` is the initial traversability preferences prompt for the AnyTraverse pipeline. Example: `grass: 1.0; rock: -0.8; water: -1.0; sand: 0.45`
 
 ### Foxglove Visualization _(Optional)_
