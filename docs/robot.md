@@ -40,7 +40,7 @@ First, you need to configure the initialization parameters for AnyTraverse speci
             roi_y_bounds: [0.75, 1.00]
     ```
 
-## Configure Nav2
+### Configure Nav2
 
 Now that we have AnyTraverse set up for traversability segmentation, we need to configure the ROS2 Nav2 stack to navigate your robot to the goal safely using AnyTraverse. First, create your Nav2 config with
 
