@@ -50,6 +50,16 @@ touch src/trav_map_navigation/config/params_mybot.yaml
 
 We will not be covering Nav2 parameter tuning here. You may refer to the [official Nav2 documentation](https://docs.nav2.org/setup_guides/index.html) for a better understanding.
 
+### Build Packages
+
+Let's build the packages again to register the newly created configuration files.
+
+```bash
+colcon build --symlink-install
+# OR
+pixi run build
+```
+
 ### We are Go For Launch! :rocket:
 
 With everything about `mybot` configured, we are now ready to launch the navigation stack with AnyTraverse.
