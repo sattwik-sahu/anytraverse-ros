@@ -17,4 +17,4 @@ launch:
           value: "$(var connection_str)"
       remap:
         - from: "/cmd_vel"
-          to: "$(var cmd_vel)"
+          to: "$(var cmd_vel_topic)"

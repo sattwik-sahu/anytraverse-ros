@@ -13,9 +13,9 @@ controller_server:
   ros__parameters:
     use_sim_time: False
     controller_frequency: 10.0
-    min_x_velocity_threshold: 0.001
-    min_y_velocity_threshold: 0.5
-    min_theta_velocity_threshold: 0.001
+    min_x_velocity_threshold: 0.2
+    min_y_velocity_threshold: 0.2
+    min_theta_velocity_threshold: 0.2
     failure_tolerance: 0.3
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"] 
@@ -25,26 +25,27 @@ controller_server:
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
-      movement_time_allowance: 10.0
+      movement_time_allowance: 120.0
     
     # Goal checker: How close is "close enough"?
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      # xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 1.25
+      yaw_goal_tolerance: 3.14
     
     # Controller (DWB is standard, MPPI is better for irregular obstacles if you have GPU)
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      min_vel_x: 0.0
+      min_vel_x: 0.3
       min_vel_y: 0.0
-      max_vel_x: 0.22
+      max_vel_x: 0.5
       max_vel_y: 0.0
       max_vel_theta: 1.0
       min_speed_xy: 0.0
-      max_speed_xy: 0.22
+      max_speed_xy: 1.0
       min_speed_theta: 0.0
       # Add critics (scoring functions)
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
@@ -67,10 +68,11 @@ local_costmap:
       global_frame: odom
       robot_base_frame: base_link
       rolling_window: true
-      width: 4
-      height: 4
+      width: 8
+      height: 8
       resolution: 0.05
-      footprint: "[ [0.15, 0.15], [0.15, -0.15], [-0.15, -0.15], [-0.15, 0.15] ]" # Adjust for your robot size
+      # footprint: "[ [0.15, 0.15], [0.15, -0.15], [-0.15, -0.15], [-0.15, 0.15] ]" # Adjust for your robot size
+      footprint: "[ [1.10, 0.70], [1.10, -0.70], [-1.10, -0.70], [-1.10, 0.70] ]" # Adjust for your robot size
       plugins: ["obstacle_layer", "inflation_layer"]
 
       obstacle_layer:
@@ -79,7 +81,7 @@ local_costmap:
         observation_sources: pointcloud_sensor
         pointcloud_sensor:
           topic: /obstacle_points  # <--- MUST MATCH the 'src' in launch file remapping
-          max_obstacle_height: 2.0
+          max_obstacle_height: 5.0
           min_obstacle_height: 0.0
           obstacle_range: 2.5
           raytrace_range: 3.0
@@ -90,20 +92,22 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.35
+        # inflation_radius: 0.35
+        inflation_radius: 1.00
 
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 1.0
-      publish_frequency: 1.0
+      update_frequency: 2.0
+      publish_frequency: 2.0
       global_frame: odom      # <--- Key change: Use odom for global planning
       robot_base_frame: base_link
       rolling_window: true    # <--- Key change: Map moves with robot
       width: 20
       height: 20
       resolution: 0.05
-      footprint: "[ [0.15, 0.15], [0.15, -0.15], [-0.15, -0.15], [-0.15, 0.15] ]"
+      # footprint: "[ [0.15, 0.15], [0.15, -0.15], [-0.15, -0.15], [-0.15, 0.15] ]"
+      footprint: "[ [1.10, 0.70], [1.10, -0.70], [-1.10, -0.70], [-1.10, 0.70] ]" # Adjust for your robot size
       plugins: ["obstacle_layer", "inflation_layer"]
 
       obstacle_layer:
@@ -112,7 +116,7 @@ global_costmap:
         observation_sources: pointcloud_sensor
         pointcloud_sensor:
           topic: /obstacle_points
-          max_obstacle_height: 2.0
+          max_obstacle_height: 5.0
           min_obstacle_height: 0.0
           obstacle_range: 2.5
           raytrace_range: 3.0
@@ -123,7 +127,8 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.35
+        # inflation_radius: 0.35
+        inflation_radius: 1.00
 
 planner_server:
   ros__parameters:
@@ -175,7 +180,7 @@ collision_monitor:
       type: "pointcloud"
       topic: "/obstacle_points" # The launch file will remap this to your actual topic
       min_height: 0.0
-      max_height: 2.0
+      max_height: 7.0
       enabled: True
 
     # Define the safety zones (Polygons)
@@ -183,7 +188,9 @@ collision_monitor:
     PolygonStop:
       type: "polygon"
       # Define a 0.6m x 0.6m stop box centered on the robot
-      points: "[[0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3]]"
+      # points: "[[0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3]]"
+      # footprint: "[ [1.10, 0.70], [1.10, -0.70], [-1.10, -0.70], [-1.10, 0.70] ]" # Adjust for your robot size
+      points: "[ [2.10, 0.90], [2.10, -0.90], [-2.10, -0.90], [-2.10, 0.90] ]"
       action_type: "stop"
       min_points: 4
       visualize: True
@@ -193,9 +200,9 @@ velocity_smoother:
   ros__parameters:
     smoothing_frequency: 20.0
     scale_velocities: False
-    feedback: "OPEN_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
-    max_velocity: [0.22, 0.0, 1.0] # x, y, theta
-    min_velocity: [-0.22, 0.0, -1.0]
+    feedback: "CLOSED_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
+    max_velocity: [0.52, 0.0, 0.7] # x, y, theta
+    min_velocity: [0.0, 0.0, -0.0]
     max_accel: [2.5, 0.0, 3.2]
     max_decel: [-2.5, 0.0, -3.2]
     odom_topic: "odom"
