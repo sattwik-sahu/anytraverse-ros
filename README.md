@@ -15,21 +15,10 @@ ROS Package for offroad navigation with [AnyTraverse](https://github.com/sattwik
     ```bash
     curl -fsSL https://pixi.sh/install.sh | bash
     ```
-- In a separate virtual environment, install [`oakd-vio-zmq`](https://github.com/sattwik-sahu/oakd-vio-zmq).
-    ```bash
-    cd path/to/other/dir
 
-    # Use uv
-    uv venv oakd-env
-    source oakd-env/bin/activate
-    uv pip install git+https://github.com/sattwik-sahu/oakd-vio-zmq.git
-    uv pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/ --pre -U depthai
-    # ... or use default Python tools
-    python3 -m venv oakd-env --prompt="oakd-env"
-    source oakd-env/bin/activate
-    pip install git+https://github.com/sattwik-sahu/oakd-vio-zmq.git
-    pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/ --pre -U depthai
-    ```
+> [!TIP]
+> :tadd: **New Update!**
+> Unlike earlier, you do not have to start the OAK-D ZMQ server in a different environment. Everything is set up in the ROS package for you.
 
 ## Installation
 
