@@ -39,6 +39,9 @@ libgl-devel = "*"
 [environments]
 jazzy = { features = ["jazzy", "build"] }
 
+[pypi-options]
+prerelease-mode = "explicit"
+
 [pypi-dependencies]
 torch = ">=2.7.1, <3"
 torchvision = ">=0.24.1, <0.25"
@@ -54,6 +57,8 @@ scipy = ">=1.16.3, <2"
 ruff = ">=0.14.8, <0.15"
 websockets = ">=15.0.1, <16"
 rhino = { git = "https://github.com/D33panshuDR/rhino.git" }
+depthai = { version = "==3.1.0", index = "https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/" }
+oakd-vio-zmq = { git = "https://github.com/sattwik-sahu/oakd-vio-zmq.git" }
 
 ### ROS Jazzy ####
 [feature.jazzy]

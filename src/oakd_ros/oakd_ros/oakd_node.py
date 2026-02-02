@@ -1,20 +1,21 @@
 import math
 import threading
+import time
 
+import cv2
 import numpy as np
 import rclpy
 from cv_bridge import CvBridge
 from geometry_msgs.msg import TransformStamped
 from numpy import typing as npt
+
+from oakd_vio_zmq.sensor import start_oakd
 from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from scipy.spatial.transform import Rotation as R
 from sensor_msgs.msg import CameraInfo, CompressedImage
 from std_msgs.msg import Header
-import cv2
 from tf2_ros import TransformBroadcaster
-
-from oakd_ros.subscribe import Subscriber
 
 
 class OakdVIO_Node(Node):
@@ -65,8 +66,7 @@ class OakdVIO_Node(Node):
         self.dist = [0.0] * 5
 
         # ZMQ reading thread
-        self._oakd_sub = Subscriber(stream_name="oakd")
-        self._oakd_sub.connect()
+        self._oakd_iter = start_oakd()
         self._thread = threading.Thread(target=self._sensor_loop, daemon=True)
         self._thread.start()
 
@@ -77,29 +77,26 @@ class OakdVIO_Node(Node):
     def _unsubscribe_sensor(self):
         self._running = False
         self._thread.join()
-        self._oakd_sub.close()
 
     # ============================================================
     # SENSOR LOOP
     # ============================================================
     def _sensor_loop(self):
-        while self._running:
-            try:
-                sensor_data = self._oakd_sub.get_next()
+        try:
+            while self._running:
+                sensor_data = next(iter(self._oakd_iter))
                 if sensor_data is None:
-                    import time
-
                     time.sleep(0.001)
                     continue
 
+                rgb, depth, _, transform = sensor_data
                 self._publish_data(
-                    rgb=sensor_data.rgb,
-                    depth_mm=sensor_data.depth,
-                    T=sensor_data.transform.astype(np.float32),
+                    rgb=rgb.astype(dtype=np.uint8),
+                    depth_mm=depth.astype(dtype=np.uint16),
+                    T=transform.astype(np.float32),
                 )
-
-            except Exception as e:
-                self.get_logger().error(f"Sensor loop error: {e}")
+        except Exception as e:
+            self.get_logger().error(f"Sensor loop error: {e}")
 
     # ============================================================
     # PUBLISH DATA
