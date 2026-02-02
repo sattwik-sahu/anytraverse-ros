@@ -17,7 +17,7 @@ ROS Package for offroad navigation with [AnyTraverse](https://github.com/sattwik
     ```
 
 > [!TIP]
-> :tadd: **New Update!**
+> :tada: **New Update!**
 > Unlike earlier, you do not have to start the OAK-D ZMQ server in a different environment. Everything is set up in the ROS package for you.
 
 ## Installation
