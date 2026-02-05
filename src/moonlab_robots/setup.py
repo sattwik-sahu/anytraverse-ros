@@ -20,6 +20,9 @@ setup(
     description="TODO: Package description",
     license="Apache-2.0",
     entry_points={
-        "console_scripts": ["hound_controller = moonlab_robots.hound_controller:main"],
+        "console_scripts": [
+            "hound_controller = moonlab_robots.hound_controller:main",
+            "kombai_controller = moonlab_robots.kombai_controller:main",
+        ],
     },
 )

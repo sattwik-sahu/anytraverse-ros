@@ -19,7 +19,7 @@ class HoundController(Node):
         )
 
         # 1. Get connection string parameter
-        self.declare_parameter(name="connection_str", value="/dev/ttyUSB0")
+        self.declare_parameter(name="connection_str", value="/dev/tty.usbmodem11201")
 
         # NOTE: Added .string_value to extract the actual string from the ROS Parameter object
         connection_str = (
@@ -39,7 +39,7 @@ class HoundController(Node):
         # 3. Create Subscriber to /cmd_vel
         self._cmd_vel_sub = self.create_subscription(
             msg_type=Twist,
-            topic="/cmd_vel",
+            topic="/anytraverse/cmd_vel",
             callback=self._send_command,
             qos_profile=qos_profile,
         )
