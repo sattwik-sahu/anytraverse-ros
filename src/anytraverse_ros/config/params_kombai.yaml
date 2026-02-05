@@ -1,0 +1,6 @@
+/anytraverse_node:
+  ros__parameters:
+    roi_unc_thresh: 0.3
+    scene_sim_thresh: 0.85
+    roi_x_bounds: [0.35, 0.65]
+    roi_y_bounds: [0.75, 1.00]

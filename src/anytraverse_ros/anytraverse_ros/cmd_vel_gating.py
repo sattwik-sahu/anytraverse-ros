@@ -7,7 +7,7 @@ from std_msgs.msg import Bool
 
 class CmdVelGating(Node):
     def __init__(self) -> None:
-        super().__init__(node_name="cmd_vel_gating_node", namespace="/anytraverse")
+        super().__init__(node_name="cmd_vel_gating_node")
 
         # QoS Settings
         qos_profile = QoSProfile(
@@ -26,7 +26,7 @@ class CmdVelGating(Node):
             msg_type=Twist,
             topic="/cmd_vel",
             callback=self._cmd_vel_callback,
-            qos_profile=10,
+            qos_profile=qos_profile,
         )
 
         self._hoc_req_sub = self.create_subscription(

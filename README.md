@@ -15,21 +15,10 @@ ROS Package for offroad navigation with [AnyTraverse](https://github.com/sattwik
     ```bash
     curl -fsSL https://pixi.sh/install.sh | bash
     ```
-- In a separate virtual environment, install [`oakd-vio-zmq`](https://github.com/sattwik-sahu/oakd-vio-zmq).
-    ```bash
-    cd path/to/other/dir
 
-    # Use uv
-    uv venv oakd-env
-    source oakd-env/bin/activate
-    uv pip install git+https://github.com/sattwik-sahu/oakd-vio-zmq.git
-    uv pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/ --pre -U depthai
-    # ... or use default Python tools
-    python3 -m venv oakd-env --prompt="oakd-env"
-    source oakd-env/bin/activate
-    pip install git+https://github.com/sattwik-sahu/oakd-vio-zmq.git
-    pip install --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/ --pre -U depthai
-    ```
+> [!TIP]
+> :tada: **New Update!**
+> Unlike earlier, you do not have to start the OAK-D ZMQ server in a different environment. Everything is set up in the ROS package for you.
 
 ## Installation
 
@@ -74,8 +63,10 @@ Once the OAK-D camera has been started, run the following commands in a terminal
     ```
 2. In a different terminal, launch the AnyTraverse navigation script.
     ```bash
-    pixi run ros2 launch trav_map_navigation anyt_launch.yaml
+    pixi run ros2 launch trav_map_navigation anyt_launch.yaml robot:="${ROBOT_NAME}" init_prompt:="${INIT_PROMPT}"
     ```
+    - `$ROBOT_NAME` is the name of the robot you wish to run the navigation on. To create your own robot configuration, follow [this guide](docs/robot.md#bring-your-own-robot).
+    - `$INIT_PROMPT` is the initial traversability preferences prompt for the AnyTraverse pipeline. Example: `grass: 1.0; rock: -0.8; water: -1.0; sand: 0.45`
 
 ### Foxglove Visualization _(Optional)_
 
@@ -87,6 +78,10 @@ pixi run ros2 launch foxglove_bridge foxglove_bridge_launch.xml
 
 > [!TIP]
 > To view your robot topics on the base station, you must set the `ROS_DOMAIN_ID` on both machines. See [this guide](docs/comm_base.md) for more information.
+
+### Deploying on Real Robots
+
+To see how to deploy on MOON Lab robots, see [this guide](docs/robot.md). To deploy on your own custom robot, see [this guide](docs/robot.md#bring-your-own-robot).
 
 ## Contribution
 

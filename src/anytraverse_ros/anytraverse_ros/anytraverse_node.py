@@ -8,6 +8,7 @@ import torch
 import websockets
 from anytraverse import build_pipeline_from_paper
 from anytraverse.utils.state import TraversalState
+from anytraverse.utils.trav_pref import parse_trav_pref_syntax
 from cv_bridge import CvBridge
 from PIL import Image as PILImage
 from rclpy.node import Node
@@ -15,12 +16,14 @@ from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Float32, Header, String
 
+from anytraverse_ros.params import ParamNames
+
 
 class AnyTraverseNode(Node):
     """The AnyTraverse node."""
 
     def __init__(self) -> None:
-        super().__init__(node_name="anytraverse_node", namespace="/anytraverse")
+        super().__init__(node_name="anytraverse_node")
 
         # Fast QoS
         qos_profile = QoSProfile(
@@ -31,13 +34,14 @@ class AnyTraverseNode(Node):
 
         # Build the AnyTraverse pipeline
         self.get_logger().info("Building AnyTraverse pipeline")
-        self._anytraverse = build_pipeline_from_paper(
-            init_traversabilty_preferences={"floor": 1.0},
-            ref_scene_similarity_threshold=0.85,
-            roi_uncertainty_threshold=0.3,
-            roi_x_bounds=(0.33, 0.67),
-            roi_y_bounds=(0.67, 0.95),
-        )
+        self._build_anytraverse_pipeline()
+        # self._anytraverse = build_pipeline_from_paper(
+        #     init_traversabilty_preferences={"grass": 1.0},
+        #     ref_scene_similarity_threshold=0.80,
+        #     roi_uncertainty_threshold=0.3,
+        #     roi_x_bounds=(0.25, 0.75),
+        #     roi_y_bounds=(0.67, 0.95),
+        # )
 
         # CV bridge
         self._bridge = CvBridge()
@@ -81,6 +85,57 @@ class AnyTraverseNode(Node):
         self._latest_msg = None
         self._busy = False
         self._lock = threading.Lock()
+
+    def _build_anytraverse_pipeline(self) -> None:
+        # Declare parameters
+        self.declare_parameter(name=ParamNames.INIT_PROMPT.value, value="")
+        self.declare_parameter(name=ParamNames.ROI_UNC_THRESH.value, value=0.0)
+        self.declare_parameter(name=ParamNames.SCENE_SIM_THRESH.value, value=0.0)
+        self.declare_parameter(name=ParamNames.ROI_X_BOUNDS.value, value=[0.0, 0.0])
+        self.declare_parameter(name=ParamNames.ROI_Y_BOUNDS.value, value=[0.0, 0.0])
+
+        # Read the parameters
+        init_prompt = parse_trav_pref_syntax(
+            syntax=self.get_parameter(name=ParamNames.INIT_PROMPT.value)
+            .get_parameter_value()
+            .string_value
+        )
+        ref_scene_sim_thresh = (
+            self.get_parameter(name=ParamNames.SCENE_SIM_THRESH.value)
+            .get_parameter_value()
+            .double_value
+        )
+        roi_unc_thresh = (
+            self.get_parameter(name=ParamNames.ROI_UNC_THRESH.value)
+            .get_parameter_value()
+            .double_value
+        )
+        roi_x_bounds: tuple[float, float] = tuple(
+            self.get_parameter(name=ParamNames.ROI_X_BOUNDS.value)
+            .get_parameter_value()
+            .double_array_value.tolist()
+        )  # type: ignore
+        roi_y_bounds: tuple[float, float] = tuple(
+            self.get_parameter(name=ParamNames.ROI_Y_BOUNDS.value)
+            .get_parameter_value()
+            .double_array_value.tolist()
+        )  # type: ignore
+
+        # Log values for debugging
+        self.get_logger().info(f"Init prompts: {init_prompt}")
+        self.get_logger().info(f"Scene similarity threshold: {ref_scene_sim_thresh}")
+        self.get_logger().info(f"ROI uncertainty threshold: {roi_unc_thresh}")
+        self.get_logger().info(f"ROI X bounds: {roi_x_bounds}")
+        self.get_logger().info(f"ROI Y bounds: {roi_y_bounds}")
+
+        # Build the pipeline using the parameters
+        self._anytraverse = build_pipeline_from_paper(
+            init_traversabilty_preferences=init_prompt,
+            ref_scene_similarity_threshold=ref_scene_sim_thresh,
+            roi_uncertainty_threshold=roi_unc_thresh,
+            roi_x_bounds=roi_x_bounds,
+            roi_y_bounds=roi_y_bounds,
+        )
 
     def _image_callback(self, msg):
         img = self._bridge.compressed_imgmsg_to_cv2(msg)
