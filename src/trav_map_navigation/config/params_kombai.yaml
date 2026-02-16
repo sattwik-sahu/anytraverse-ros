@@ -35,10 +35,10 @@ controller_server:
       time_steps: 56
       model_dt: 0.05
       batch_size: 2000
-      vx_std: 0.2
+      vx_std: 0.35
       vy_std: 0.2
-      wz_std: 0.4
-      vx_max: 0.7
+      wz_std: 0.6
+      vx_max: 1.0
       vx_min: -0.4
       vy_max: 0.5
       wz_max: 1.9
@@ -48,9 +48,9 @@ controller_server:
       ay_max: 3.0
       az_max: 3.5
       iteration_count: 1
-      temperature: 0.3
+      temperature: 1.2
       gamma: 0.015
-      motion_model: "Omni" # For quadruped
+      motion_model: "DiffDrive" # For quadruped
       visualize: false
       # reset_period: 1.0 # (only in Humble)
       regenerate_noises: false
@@ -91,7 +91,7 @@ controller_server:
       PreferForwardCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 5.0
+        cost_weight: 0.5
         threshold_to_consider: 0.5
       # ObstaclesCritic:
       #   enabled: true
@@ -213,8 +213,8 @@ local_costmap:
       robot_base_frame: base_link
       rolling_window: true
 
-      width: 6
-      height: 6
+      width: 8
+      height: 8
       resolution: 0.05
 
       always_send_full_costmap: true
@@ -259,8 +259,8 @@ local_costmap:
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.35
-        cost_scaling_factor: 2.5
+        inflation_radius: 0.25
+        cost_scaling_factor: 4.0
 
 global_costmap:
   global_costmap:
@@ -272,6 +272,7 @@ global_costmap:
       resolution: 0.05
       footprint: "[ [0.325, 0.15], [0.325, -0.15], [-0.325, -0.15], [-0.325, 0.15] ]"
       plugins: ["voxel_layer", "inflation_layer"]
+      rolling_window: true
       # plugins: ["obstacle_layer", "inflation_layer"]
 
       voxel_layer:
@@ -409,7 +410,7 @@ collision_monitor:
     PolygonStop:
       type: "polygon"
       # Define a 0.6m x 0.6m stop box centered on the robot
-      points: "[[0.3, 0.14], [0.3, -0.14], [-0.3, -0.14], [-0.3, 0.14]]"
+      points: "[[0.35, 0.16], [0.35, -0.16], [-0.35, -0.16], [-0.35, 0.16]]"
       action_type: "stop"
       min_points: 4
       visualize: True
@@ -420,8 +421,8 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "CLOSED_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
-    max_velocity: [0.5, 0.0, 1.57] # x, y, theta
-    min_velocity: [-0.0, 0.0, -1.57]
+    max_velocity: [0.75, 0.3, 1.9] # x, y, theta
+    min_velocity: [-0.4, -0.3, -1.9]
     max_accel: [1.5, 0.0, 2.0]
     max_decel: [-1.5, 0.0, -2.0]
     odom_topic: "odom"
