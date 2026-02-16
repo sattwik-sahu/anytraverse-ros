@@ -314,7 +314,7 @@ planner_server:
       max_iterations: 1000000
       max_on_approach_iterations: 1000
       max_planning_time: 5.0 # Planning and smoothing should complete in 5.0 sec
-      motion_model_for_search: "DUBIN" # Dubin's model for motion
+      motion_model_for_search: "REEDS_SHEPP" # Motion model for legged robot
       angle_quantization_bins: 64 # Docs say 72 but meh whatever
       analytic_expansion_ratio: 3.5
       analytic_expansion_max_length: 3.0
