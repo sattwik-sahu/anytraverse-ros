@@ -35,9 +35,9 @@ controller_server:
       time_steps: 56
       model_dt: 0.05
       batch_size: 2000
-      vx_std: 0.4
-      vy_std: 0.2
-      wz_std: 0.7
+      vx_std: 0.7
+      vy_std: 0.3
+      wz_std: 1.0
       vx_max: 1.0
       vx_min: -0.4
       vy_max: 0.5
@@ -50,7 +50,7 @@ controller_server:
       iteration_count: 1
       temperature: 1.2
       gamma: 0.015
-      motion_model: "DiffDrive" # For quadruped
+      motion_model: "Omni" # For quadruped
       visualize: false
       # reset_period: 1.0 # (only in Humble)
       regenerate_noises: false
@@ -108,9 +108,11 @@ controller_server:
         enabled: true
         cost_power: 1
         cost_weight: 3.81
-        critical_cost: 300.0
+        critical_cost: 50.0
+        # critical_cost: 300.0
         consider_footprint: true
-        collision_cost: 1000000.0
+        collision_cost: 1000.0
+        # collision_cost: 1000000.0
         near_goal_distance: 1.0
         trajectory_point_step: 2
       PathAlignCritic:
