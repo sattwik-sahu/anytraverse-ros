@@ -17,22 +17,22 @@ controller_server:
       time_steps: 56
       model_dt: 0.05
       batch_size: 2000
-      vx_std: 0.2
-      vy_std: 0.2
-      wz_std: 0.4
-      vx_max: 0.5
-      vx_min: -0.35
+      vx_std: 1.0
+      vy_std: 0.6
+      wz_std: 1.57
+      vx_max: 1.0
+      vx_min: -0.4
       vy_max: 0.5
-      wz_max: 1.9
+      wz_max: 3.14
       ax_max: 3.0
       ax_min: -3.0
       ay_min: -3.0
       ay_max: 3.0
       az_max: 3.5
       iteration_count: 1
-      temperature: 0.3
-      gamma: 0.015
-      motion_model: "DiffDrive"
+      temperature: 1.2
+      gamma: 0.05
+      motion_model: "Omni"
       visualize: false
       reset_period: 1.0 # (only in Humble)
       regenerate_noises: false
@@ -69,7 +69,7 @@ controller_server:
         cost_weight: 3.0
         threshold_to_consider: 0.5
       PreferForwardCritic:
-        enabled: true
+        enabled: false
         cost_power: 1
         cost_weight: 5.0
         threshold_to_consider: 0.5
@@ -346,8 +346,8 @@ velocity_smoother:
     feedback: "CLOSED_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
     max_velocity: [0.75, 0.3, 1.9] # x, y, theta
     min_velocity: [-0.4, -0.3, -1.9]
-    max_accel: [1.5, 0.0, 2.0]
-    max_decel: [-1.5, 0.0, -2.0]
+    max_accel: [1.5, 1.5, 2.0]
+    max_decel: [-1.5, -1.5, -2.0]
     odom_topic: "odom"
     robot_base_frame: "base_link"
 
