@@ -55,13 +55,7 @@ scipy = ">=1.16.3, <2"
 ruff = ">=0.14.8, <0.15"
 websockets = ">=15.0.1, <16"
 rhino = { git = "https://github.com/D33panshuDR/rhino.git" }
-oakd-vio-zmq = { git = "https://github.com/sattwik-sahu/oakd-vio-zmq.git" }
-
-[target.osx-arm64.pypi-dependencies]
-depthai = { url = "https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/depthai/depthai-3.1.0-cp313.cp38.cp310.cp39.cp311.cp312-cp313.cp38.cp310.cp39.cp311.cp312-macosx_14_0_arm64.whl" }
-
-[target.linux-64.pypi-dependencies]
-depthai = { version = "==3.1.0", index = "https://artifacts.luxonis.com/artifactory/luxonis-python-release-local/" }
+depthai = ">=3.3.0, <4"
 
 
 ### ROS Jazzy ####
