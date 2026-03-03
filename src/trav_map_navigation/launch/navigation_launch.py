@@ -42,16 +42,6 @@ def generate_launch_description():
         description="Use simulation (Gazebo/Webots) clock if True",
     )
 
-    # NODES
-    # "Inverted" Static TF: odom -> camera_link (from VIO) -> base_link (static)
-    tf_fix_node = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="camera_to_base",
-        arguments=["-0.25", "0", "-0.30", "0", "0", "0", "camera_link", "base_link"],
-        output="screen",
-    )
-
     nav2_group = GroupAction(
         actions=[
             SetRemap(src="/obstacle_points", dst=LaunchConfiguration("obstacle_topic")),
@@ -75,9 +65,7 @@ def generate_launch_description():
         [
             obstacle_topic_arg,
             params_file_arg,
-            # robot_params_file_arg,
             sim_time_arg,
-            tf_fix_node,
             nav2_group,
         ]
     )

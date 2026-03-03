@@ -1,10 +1,8 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import (
-    AnyLaunchDescriptionSource,
     PythonLaunchDescriptionSource,
 )
 from launch.substitutions import (
@@ -14,10 +12,14 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
+from launch import LaunchDescription
+
 
 def generate_launch_description():
     trav_map_navigation_share_dir = get_package_share_directory("trav_map_navigation")
     anytraverse_share_dir = get_package_share_directory("anytraverse_ros")
+    moonlab_robots_share_dir = get_package_share_directory("moonlab_robots")
+    oakd_ros_share_dir = get_package_share_directory("oakd_ros")
 
     # Args
     obstacle_topic_arg = DeclareLaunchArgument(
@@ -37,17 +39,48 @@ def generate_launch_description():
         name="init_prompt",
         description="Initial prompts for the AnyTraverse pipeline",
     )
-
-    # 1. Include the OAK-D VIO launch file
-    oakd_ros_share_dir = get_package_share_directory("oakd_ros")
-    oakd_vio_launch_path = os.path.join(
-        oakd_ros_share_dir, "launch", "oakd_vio_launch.yaml"
+    camera_rgb_topic_arg = DeclareLaunchArgument(
+        name="camera_rgb_topic",
+        default_value="/camera/rgb/image_raw",
+        description="Topic for the RGB camera feed",
     )
-    oakd_vio_launch = IncludeLaunchDescription(
-        AnyLaunchDescriptionSource(oakd_vio_launch_path)
+    camera_rgb_info_topic_arg = DeclareLaunchArgument(
+        name="camera_rgb_info_topic",
+        default_value="/camera/rgb/camera_info",
+        description="Topic for the RGB camera info",
+    )
+    camera_depth_topic_arg = DeclareLaunchArgument(
+        name="camera_depth_topic",
+        default_value="/camera/depth/image_raw",
+        description="Topic for the depth camera feed",
+    )
+    camera_depth_info_topic_arg = DeclareLaunchArgument(
+        name="camera_depth_info_topic",
+        default_value="/camera/depth/camera_info",
+        description="Topic for the depth camera info",
+    )
+    camera_optical_frame_arg = DeclareLaunchArgument(
+        name="camera_optical_frame",
+        default_value="camera_rgb_optical_frame",
+        description="TF frame ID for the camera optical frame",
     )
 
-    # 2. Start the 'anytraverse_node'
+    # Start the camera and robot
+    oakd_node = Node(
+        package="oakd_ros",
+        executable="oakd_node",
+        name="oakd_node",
+        output="screen",
+    )
+    robot_launch_path = os.path.join(
+        moonlab_robots_share_dir, "launch", "robot.launch.py"
+    )
+    robot_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(robot_launch_path),
+        launch_arguments={"robot": LaunchConfiguration("robot")}.items(),
+    )
+
+    # Start AnyTraverse node
     anytraverse_params_file_path = PathJoinSubstitution(
         [
             anytraverse_share_dir,
@@ -68,9 +101,11 @@ def generate_launch_description():
                 )
             },
         ],
+        remappings=[
+            ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
+        ],
     )
 
-    # 3. Start the 'anytraverse_node'
     cmd_vel_gating_node = Node(
         package="anytraverse_ros",
         executable="cmd_vel_gating_node",
@@ -87,6 +122,16 @@ def generate_launch_description():
         remappings=[
             ("/trav_map", LaunchConfiguration("trav_map_topic")),
             ("/obstacle_points", LaunchConfiguration("obstacle_topic")),
+            ("/camera/depth/image_raw", LaunchConfiguration("camera_depth_topic")),
+            (
+                "/camera/depth/camera_info",
+                LaunchConfiguration("camera_depth_info_topic"),
+            ),
+        ],
+        parameters=[
+            {
+                "camera_optical_frame_id": LaunchConfiguration("camera_optical_frame"),
+            }
         ],
     )
 
@@ -113,9 +158,15 @@ def generate_launch_description():
         [
             obstacle_topic_arg,
             trav_map_topic_arg,
+            camera_rgb_topic_arg,
+            camera_rgb_info_topic_arg,
+            camera_depth_topic_arg,
+            camera_depth_info_topic_arg,
+            camera_optical_frame_arg,
             robot_arg,
             init_prompt_arg,
-            oakd_vio_launch,
+            oakd_node,
+            robot_launch,
             anytraverse_node,
             obstacle_pcl_node,
             navigation_launch,

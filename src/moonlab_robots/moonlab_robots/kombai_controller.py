@@ -26,7 +26,7 @@ class ZMQPublisher[TMessage](ABC):
         socket (zmq.Socket): The PUB socket.
     """
 
-    def __init__(self, address: str = "tcp:") -> None:
+    def __init__(self, address: str) -> None:
         """
         Initializes the ZMQPublisher.
 

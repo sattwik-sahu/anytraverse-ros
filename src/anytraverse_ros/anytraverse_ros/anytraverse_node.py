@@ -13,7 +13,7 @@ from cv_bridge import CvBridge
 from PIL import Image as PILImage
 from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import CompressedImage, Image
 from std_msgs.msg import Bool, Float32, Header, String
 
 from anytraverse_ros.params import ParamNames
@@ -41,20 +41,20 @@ class AnyTraverseNode(Node):
 
         # Subscribe to the image topic
         self._image_sub = self.create_subscription(
-            msg_type=CompressedImage,
-            topic="/camera/color/image_raw/compressed",
+            msg_type=Image,
+            topic="/camera/rgb/image_raw",
             qos_profile=qos_profile,
             callback=self._image_callback,
         )
 
         # Publishers for the AnyTraverse output topics
         self._trav_map_pub = self.create_publisher(
-            msg_type=CompressedImage,
+            msg_type=Image,
             topic="/anytraverse/trav_map",
             qos_profile=qos_profile,
         )
         self._unc_map_pub = self.create_publisher(
-            msg_type=CompressedImage,
+            msg_type=Image,
             topic="/anytraverse/unc_map",
             qos_profile=qos_profile,
         )
@@ -131,7 +131,7 @@ class AnyTraverseNode(Node):
         )
 
     def _image_callback(self, msg):
-        img = self._bridge.compressed_imgmsg_to_cv2(msg)
+        img = self._bridge.imgmsg_to_cv2(msg)
 
         with self._lock:
             self._latest_msg = (img, msg.header)
@@ -178,7 +178,7 @@ class AnyTraverseNode(Node):
         hoc_req: bool,
         incoming_header: Header,
     ) -> None:
-        def to_uint8_img(t):
+        def _to_uint8_img(t):
             img = t.detach().cpu().numpy()
             if img.ndim == 2:
                 img = (img * 255).clip(0, 255).astype("uint8")
@@ -191,12 +191,12 @@ class AnyTraverseNode(Node):
             return img
 
         # Convert traversability and uncertainty maps to numpy
-        trav_np = to_uint8_img(trav_map)
-        unc_np = to_uint8_img(unc_map)
+        trav_np = _to_uint8_img(trav_map)
+        unc_np = _to_uint8_img(unc_map)
 
         # Compress the traversability and uncertainty maps
-        trav_map_msg = self._bridge.cv2_to_compressed_imgmsg(trav_np, dst_format="jpg")
-        unc_map_msg = self._bridge.cv2_to_compressed_imgmsg(unc_np, dst_format="jpg")
+        trav_map_msg = self._bridge.cv2_to_imgmsg(trav_np)
+        unc_map_msg = self._bridge.cv2_to_imgmsg(unc_np)
         trav_map_msg.header = incoming_header
         unc_map_msg.header = incoming_header
 

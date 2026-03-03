@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 import message_filters
-from sensor_msgs.msg import CameraInfo, PointCloud2, PointField, CompressedImage
+from sensor_msgs.msg import CameraInfo, PointCloud2, PointField, Image
 from cv_bridge import CvBridge
 import numpy as np
 import cv2
@@ -11,8 +11,11 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 class ObstaclePointCloudNode(Node):
     """The obstacle cloud projector node"""
 
+    _CAMERA_OPTICAL_FRAME_ID_PARAM: str = "camera_optical_frame_id"
+    _TRAVERSABILITY_THRESHOLD_PARAM: str = "traversability_threshold"
+
     def __init__(self) -> None:
-        super().__init__(node_name="obstacle_cloud_node")
+        super().__init__(node_name="obstacle_pcl_node")
 
         qos_profile = QoSProfile(
             depth=1,
@@ -21,18 +24,28 @@ class ObstaclePointCloudNode(Node):
         )
 
         # Declare parameters
-        self.declare_parameter("traversability_threshold", 0.5)
+        self.declare_parameter(name=self._TRAVERSABILITY_THRESHOLD_PARAM, value=0.5)
+        self.declare_parameter(
+            name=self._CAMERA_OPTICAL_FRAME_ID_PARAM, value="camera_rgb_optical_frame"
+        )
         self._trav_thresh: float = (
-            self.get_parameter("traversability_threshold").value or 0.5
+            self.get_parameter(self._TRAVERSABILITY_THRESHOLD_PARAM)
+            .get_parameter_value()
+            .double_value
+        )
+        self._optical_frame_id: str = (
+            self.get_parameter(name=self._CAMERA_OPTICAL_FRAME_ID_PARAM)
+            .get_parameter_value()
+            .string_value
         )
 
         # Create subscribers
         self._depth_sub = message_filters.Subscriber(
-            self, CompressedImage, "/camera/depth/image_raw/compressedDepth"
+            self, Image, "/camera/depth/image_raw"
         )
-        self._trav_sub = message_filters.Subscriber(self, CompressedImage, "/trav_map")
+        self._trav_sub = message_filters.Subscriber(self, Image, "/trav_map")
         self._camera_info_sub = message_filters.Subscriber(
-            self, CameraInfo, "/camera/color/camera_info"
+            self, CameraInfo, "/camera/depth/camera_info"
         )
 
         # Sync the topics
@@ -61,38 +74,46 @@ class ObstaclePointCloudNode(Node):
 
     def _sync_callback(
         self,
-        depth_msg: CompressedImage,
-        trav_msg: CompressedImage,
+        depth_msg: Image,
+        trav_msg: Image,
         camera_info_msg: CameraInfo,
     ) -> None:
         try:
-            # ==== Decode the depth image ====
-            # Read compressed depth bytes (:. uint8)
-            depth_np = np.frombuffer(depth_msg.data, np.uint8)
-
-            # Decode bytes to original depth map
-            depth_img = cv2.imdecode(depth_np, cv2.IMREAD_UNCHANGED)
+            # ==== 1. Decode Depth Image correctly ====
+            # CvBridge knows how to handle the raw bit-depth (16-bit or 32-bit)
+            # 'passthrough' keeps the original encoding (usually 16UC1 for mm)
+            depth_img = self._bridge.imgmsg_to_cv2(
+                depth_msg, desired_encoding="passthrough"
+            )
 
             # Validate depth image
             if depth_img is None:
                 self.get_logger().warn("Failed to decode depth image")
                 return
 
-            # Convert depth from mm to m
-            depth_img_m = depth_img.astype(np.float32) * 1e-3
+            # Convert depth from mm (uint16) to m (float32)
+            # If your camera already sends float32 (meters), this handles both.
+            if depth_img.dtype == np.uint16:
+                depth_img_m = depth_img.astype(np.float32) * 1e-3
+            else:
+                depth_img_m = depth_img.astype(np.float32)
 
-            # ==== Read the traversability map ====
-            # This returns uint8 (0-255)
-            trav_map_uint8 = self._bridge.compressed_imgmsg_to_cv2(trav_msg)
+            # ==== 2. Read the traversability map ====
+            # Using standard Image conversion now
+            trav_map_uint8 = self._bridge.imgmsg_to_cv2(
+                trav_msg, desired_encoding="passthrough"
+            )
 
             # Handle Grayscale vs Color shapes
             if len(trav_map_uint8.shape) == 3:
-                trav_map_uint8 = trav_map_uint8[:, :, 0]  # Take one channel if BGR
+                # If RGB, AnyTraverse puts data in all channels, so taking [0] is fine
+                trav_map_uint8 = trav_map_uint8[:, :, 0]
 
             # Normalize to 0.0 - 1.0 range
             trav_map = trav_map_uint8.astype(np.float32) / 255.0
+
         except Exception as e:
-            self.get_logger().error(f"Error processing images...\n{e}")
+            self.get_logger().error(f"Error processing images: {e}")
             return
 
         # ==== Vectorized pixel reprojection ====
@@ -123,7 +144,9 @@ class ObstaclePointCloudNode(Node):
 
         # Metadata
         obst_pcl_msg.header = depth_msg.header
-        obst_pcl_msg.header.frame_id = "camera_optical_link"
+        obst_pcl_msg.header.frame_id = self.get_parameter(
+            self._CAMERA_OPTICAL_FRAME_ID_PARAM
+        ).value
         obst_pcl_msg.height = 1
         obst_pcl_msg.width = x_obst.shape[0]
 
