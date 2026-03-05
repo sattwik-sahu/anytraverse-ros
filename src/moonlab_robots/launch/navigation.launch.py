@@ -9,31 +9,20 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    trav_map_nav_pkg = FindPackageShare("trav_map_navigation")
     nav2_bringup_pkg = FindPackageShare("nav2_bringup")
 
-    default_params_file = PathJoinSubstitution(
-        [trav_map_nav_pkg, "config", "nav", "params_default.yaml"]
-    )
-
-    # ARGS
+    # Obstacle pointclouds topic arg
     obstacle_topic_arg = DeclareLaunchArgument(
         "obstacle_topic",
         default_value="/obstacle_points",
         description="Topic to remap for obstacle avoidance",
     )
 
+    # Nav2 params file arg
     params_file_arg = DeclareLaunchArgument(
         "params_file",
-        default_value=default_params_file,
         description="Path to nav2 params file",
     )
-
-    # robot_params_file_arg = DeclareLaunchArgument(
-    #     "robot_params_file",
-    #     # default_value=default_params_file,
-    #     description="Path to robot params file",
-    # )
 
     # Added this arg for easy switching to Webots later
     sim_time_arg = DeclareLaunchArgument(
@@ -55,7 +44,6 @@ def generate_launch_description():
                     "params_file": LaunchConfiguration("params_file"),
                     "use_sim_time": LaunchConfiguration("use_sim_time"),
                     "autostart": "True",
-                    # "start_docking_server": "False",
                 }.items(),
             ),
         ]

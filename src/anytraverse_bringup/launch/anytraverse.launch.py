@@ -16,8 +16,7 @@ from launch import LaunchDescription
 
 
 def generate_launch_description():
-    trav_map_navigation_share_dir = get_package_share_directory("trav_map_navigation")
-    anytraverse_share_dir = get_package_share_directory("anytraverse_ros")
+    anytraverse_bringup_share_dir = get_package_share_directory("anytraverse_bringup")
     moonlab_robots_share_dir = get_package_share_directory("moonlab_robots")
 
     # Args
@@ -63,6 +62,11 @@ def generate_launch_description():
         default_value="camera_rgb_optical_frame",
         description="TF frame ID for the camera optical frame",
     )
+    gated_cmd_vel_topic_arg = DeclareLaunchArgument(
+        name="gated_cmd_vel_topic",
+        default_value="/anytraverse/cmd_vel",
+        description="Topic for AnyTraverse gated cmd_vel output (for HOC)",
+    )
 
     # Start the camera
     oakd_node = Node(
@@ -70,6 +74,12 @@ def generate_launch_description():
         executable="oakd_node",
         name="oakd_node",
         output="screen",
+        remappings={
+            "/oakd/rgb/image_raw": LaunchConfiguration("camera_rgb_topic"),
+            "/oakd/rgb/camera_info": LaunchConfiguration("camera_rgb_info_topic"),
+            "/oakd/depth/image_raw": LaunchConfiguration("camera_depth_topic"),
+            "/oakd/depth/camera_info": LaunchConfiguration("camera_depth_info_topic"),
+        }.items(),
     )
 
     # Start the robot and navigation
@@ -94,9 +104,9 @@ def generate_launch_description():
     # Start AnyTraverse node
     anytraverse_params_file_path = PathJoinSubstitution(
         [
-            anytraverse_share_dir,
+            anytraverse_bringup_share_dir,
             "config",
-            ["params_", LaunchConfiguration("robot"), ".yaml"],
+            [LaunchConfiguration("robot"), ".yaml"],
         ]
     )
     anytraverse_node = Node(
@@ -114,6 +124,7 @@ def generate_launch_description():
         ],
         remappings=[
             ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
+            ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
         ],
     )
 
@@ -122,6 +133,9 @@ def generate_launch_description():
         executable="cmd_vel_gating_node",
         name="cmd_vel_gating",
         output="screen",
+        remappings={
+            "/anytraverse/cmd_vel": LaunchConfiguration("gated_cmd_vel_topic"),
+        }.items(),
     )
 
     # 4. Start the 'obstacle_pcl_node' with remappings
@@ -146,15 +160,16 @@ def generate_launch_description():
         ],
     )
 
-    # 4. Include the 'navigation_launch.py' file
+    # Navigation launch with obstacle topic and params file
     navigation_launch_path = os.path.join(
-        trav_map_navigation_share_dir, "launch", "navigation_launch.py"
+        moonlab_robots_share_dir, "launch", "navigation.launch.py"
     )
     nav_params_file_path = PathJoinSubstitution(
         [
-            trav_map_navigation_share_dir,
+            moonlab_robots_share_dir,
             "config",
-            ["params_", LaunchConfiguration("robot"), ".yaml"],
+            LaunchConfiguration("robot"),
+            "nav2_params.yaml",
         ]
     )
     navigation_launch = IncludeLaunchDescription(
@@ -174,6 +189,7 @@ def generate_launch_description():
             camera_depth_topic_arg,
             camera_depth_info_topic_arg,
             camera_optical_frame_arg,
+            gated_cmd_vel_topic_arg,
             robot_arg,
             init_prompt_arg,
             oakd_node,

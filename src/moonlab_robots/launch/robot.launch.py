@@ -25,7 +25,7 @@ def launch_setup(context, *args, **kwargs):
     pkg_path = get_package_share_directory("moonlab_robots")
 
     urdf_file = os.path.join(pkg_path, "urdf", "robot.urdf.xacro")
-    config_file = os.path.join(pkg_path, "config", "robot_camera_mounts.yaml")
+    config_file = os.path.join(pkg_path, "config", robot_name, "camera_mount.yaml")
 
     # Pass the file path and robot name as Xacro arguments
     robot_description_content = Command(

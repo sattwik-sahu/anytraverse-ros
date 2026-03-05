@@ -4,11 +4,10 @@ import message_filters
 from sensor_msgs.msg import CameraInfo, PointCloud2, PointField, Image
 from cv_bridge import CvBridge
 import numpy as np
-import cv2
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 
-class ObstaclePointCloudNode(Node):
+class SegmentationToObstaclePointCloudNode(Node):
     """The obstacle cloud projector node"""
 
     _CAMERA_OPTICAL_FRAME_ID_PARAM: str = "camera_optical_frame_id"
@@ -163,11 +162,8 @@ class ObstaclePointCloudNode(Node):
         obst_pcl_msg.is_dense = True
 
         # Stack x, y, z coords, convert to bytes
-        # obst_points = np.column_stack((-y_obst, -z_obst, x_obst)).astype(
-        #     dtype=np.float32
-        # )
         obst_points = np.column_stack((x_obst, y_obst, z_obst)).astype(dtype=np.float32)
-        # obst_points = obst_points[::2]
+        obst_points = obst_points[::2]
         obst_pcl_msg.data = obst_points.tobytes()
 
         # Publish the obstacle pointcloud!
@@ -176,7 +172,7 @@ class ObstaclePointCloudNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ObstaclePointCloudNode()
+    node = SegmentationToObstaclePointCloudNode()
 
     try:
         rclpy.spin(node=node)
