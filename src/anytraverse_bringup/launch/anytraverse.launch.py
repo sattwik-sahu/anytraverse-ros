@@ -197,6 +197,6 @@ def generate_launch_description():
             anytraverse_node,
             obstacle_pcl_node,
             navigation_launch,
-            cmd_vel_gating_node,
+            # cmd_vel_gating_node,
         ]
     )

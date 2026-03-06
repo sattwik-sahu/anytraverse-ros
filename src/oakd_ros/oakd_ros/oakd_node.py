@@ -10,7 +10,6 @@ from sensor_msgs.msg import CameraInfo, Image, Imu
 
 from oakd_ros.utils import (
     build_camera_info,
-    depthai_timestamp_to_ros,
     set_stereo_preset,
 )
 
@@ -143,7 +142,7 @@ class OakdCameraNode(Node):
     def _process_rgb(self) -> None:
         frame: depthai.ImgFrame | None = self._rgb_queue.tryGet()  # type: ignore
         if frame is not None:
-            ros_timestamp = depthai_timestamp_to_ros(frame.getTimestamp())  # type: ignore
+            ros_timestamp = self.get_clock().now().to_msg()
             cv_image: npt.NDArray[np.uint8] = frame.getCvFrame()  # type: ignore
 
             # Construct messages
@@ -163,7 +162,7 @@ class OakdCameraNode(Node):
     def _process_depth(self) -> None:
         frame: depthai.ImgFrame | None = self._depth_queue.tryGet()  # type: ignore
         if frame is not None:
-            ros_timestamp = depthai_timestamp_to_ros(timestamp=frame.getTimestamp())  # type: ignore
+            ros_timestamp = self.get_clock().now().to_msg()
             depth_np: npt.NDArray[np.float64] = frame.getFrame()  # type: ignore
 
             # Construct messages
@@ -185,9 +184,7 @@ class OakdCameraNode(Node):
 
         if imu_data is not None:
             for packet in imu_data.packets:
-                ros_timestamp = depthai_timestamp_to_ros(
-                    timestamp=imu_data.getTimestamp()  # type: ignore
-                )
+                ros_timestamp = self.get_clock().now().to_msg()
                 accel = packet.acceleroMeter
                 gyro = packet.gyroscope
 

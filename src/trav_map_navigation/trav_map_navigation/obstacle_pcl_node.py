@@ -125,6 +125,10 @@ class ObstaclePointCloudNode(Node):
         h, w = depth_img_m.shape
         u_grid, v_grid = np.meshgrid(np.arange(w), np.arange(h))
 
+        # crop_width = int(w * 0.05)  # 5% of width
+        crop_height = int(h * 0.1)  # 5% of height
+        trav_map[-crop_height:, :] = 1.0
+
         # Mask for obstacle points (pixel coords)
         obst_mask = (
             (depth_img_m > 0.25) & (depth_img_m < 10.0) & (trav_map < self._trav_thresh)
@@ -167,7 +171,7 @@ class ObstaclePointCloudNode(Node):
         #     dtype=np.float32
         # )
         obst_points = np.column_stack((x_obst, y_obst, z_obst)).astype(dtype=np.float32)
-        # obst_points = obst_points[::2]
+        obst_points = obst_points[::2]
         obst_pcl_msg.data = obst_points.tobytes()
 
         # Publish the obstacle pointcloud!

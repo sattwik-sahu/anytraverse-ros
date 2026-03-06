@@ -106,10 +106,10 @@ def set_stereo_preset(stereo: depthai.node.StereoDepth) -> None:
     #         stereo.setDefaultProfilePreset(preset)
     #         preset_applied = True
     #         break
-    # stereo.setDefaultProfilePreset(depthai.node.StereoDepth.PresetMode.FAST_ACCURACY)
+    stereo.setDefaultProfilePreset(depthai.node.StereoDepth.PresetMode.ROBOTICS)
 
     # if not preset_applied:
-    stereo.initialConfig.setConfidenceThreshold(200)
-    stereo.initialConfig.setMedianFilter(depthai.MedianFilter.KERNEL_7x7)
+    # stereo.initialConfig.setConfidenceThreshold(200)
+    # stereo.initialConfig.setMedianFilter(depthai.MedianFilter.KERNEL_7x7)
 
     stereo.setLeftRightCheck(True)

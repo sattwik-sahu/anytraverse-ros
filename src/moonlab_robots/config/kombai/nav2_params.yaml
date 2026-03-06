@@ -31,7 +31,7 @@ controller_server:
       az_max: 6.28
       iteration_count: 1
       temperature: 1.2
-      gamma: 0.05
+      gamma: 0.15
       motion_model: "DiffDrive"
       visualize: false
       reset_period: 1.0 # (only in Humble)
@@ -168,7 +168,7 @@ local_costmap:
           topic: /obstacle_points
           data_type: "PointCloud2"
 
-          min_obstacle_height: 0.12
+          min_obstacle_height: 0.0
           max_obstacle_height: 0.6
 
           obstacle_max_range: 3.0
@@ -216,7 +216,7 @@ global_costmap:
         pointcloud: # no frame set, uses frame from message
           topic: /obstacle_points
           max_obstacle_height: 0.6
-          min_obstacle_height: 0.12
+          min_obstacle_height: 0.0
           obstacle_max_range: 3.0
           obstacle_min_range: 0.1
           raytrace_max_range: 4.0
@@ -326,7 +326,7 @@ collision_monitor:
     pointcloud_source:
       type: "pointcloud"
       topic: "/obstacle_points" # The launch file will remap this to your actual topic
-      min_height: 0.0
+      min_height: 0.1
       max_height: 2.0
       enabled: True
 
@@ -337,7 +337,7 @@ collision_monitor:
       # Define a 0.6m x 0.6m stop box centered on the robot
       points: "[[0.35, 0.16], [0.35, -0.16], [-0.35, -0.16], [-0.35, 0.16]]"
       action_type: "stop"
-      min_points: 4
+      min_points: 10
       visualize: True
       polygon_pub_topic: "polygon_stop"
 

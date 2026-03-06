@@ -124,6 +124,9 @@ class SegmentationToObstaclePointCloudNode(Node):
         h, w = depth_img_m.shape
         u_grid, v_grid = np.meshgrid(np.arange(w), np.arange(h))
 
+        crop_height = int(h * 0.05)  # 5% of height
+        trav_map[-crop_height:, :] = 1.0
+
         # Mask for obstacle points (pixel coords)
         obst_mask = (
             (depth_img_m > 0.25) & (depth_img_m < 10.0) & (trav_map < self._trav_thresh)
