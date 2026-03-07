@@ -13,6 +13,8 @@ from oakd_ros.utils import (
     set_stereo_preset,
 )
 
+from cv_bridge import CvBridge
+
 
 class OakdCameraNode(Node):
     FPS: int = 30
@@ -31,6 +33,8 @@ class OakdCameraNode(Node):
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
         )
+        # Create the CV Bridge
+        self._cv_bridge: CvBridge = CvBridge()
 
         # Publishers
         self._image_pub: Publisher = self.create_publisher(
@@ -146,13 +150,9 @@ class OakdCameraNode(Node):
             cv_image: npt.NDArray[np.uint8] = frame.getCvFrame()  # type: ignore
 
             # Construct messages
-            image_msg: Image = Image()
+            image_msg: Image = self._cv_bridge.cv2_to_imgmsg(cv_image, encoding="bgr8")
             image_msg.header.stamp = ros_timestamp
             image_msg.header.frame_id = self.OPTICAL_FRAME_ID
-            image_msg.height, image_msg.width = cv_image.shape[:2]
-            image_msg.encoding = "bgr8"
-            image_msg.step = image_msg.width * 3
-            image_msg.data = cv_image.tobytes()
             self._rgb_info_msg.header.stamp = ros_timestamp
 
             # Publish messages
@@ -163,16 +163,12 @@ class OakdCameraNode(Node):
         frame: depthai.ImgFrame | None = self._depth_queue.tryGet()  # type: ignore
         if frame is not None:
             ros_timestamp = self.get_clock().now().to_msg()
-            depth_np: npt.NDArray[np.float64] = frame.getFrame()  # type: ignore
+            depth_np: npt.NDArray[np.uint16] = frame.getFrame()  # type: ignore
 
             # Construct messages
-            depth_msg: Image = Image()
+            depth_msg = self._cv_bridge.cv2_to_imgmsg(depth_np, encoding="16UC1")
             depth_msg.header.stamp = ros_timestamp
             depth_msg.header.frame_id = self.OPTICAL_FRAME_ID
-            depth_msg.height, depth_msg.width = depth_np.shape[:2]
-            depth_msg.encoding = "16UC1"
-            depth_msg.step = depth_msg.width * 2
-            depth_msg.data = depth_np.tobytes()
             self._depth_info_msg.header.stamp = ros_timestamp
 
             # Publish messages

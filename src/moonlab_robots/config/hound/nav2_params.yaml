@@ -24,15 +24,15 @@ controller_server:
       vx_min: -0.4
       vy_max: 0.5
       wz_max: 3.14
-      ax_max: 3.0
-      ax_min: -3.0
+      ax_max: 7.0
+      ax_min: -7.0
       ay_min: -3.0
       ay_max: 3.0
-      az_max: 3.5
+      az_max: 6.28
       iteration_count: 1
       temperature: 1.2
-      gamma: 0.05
-      motion_model: "Omni"
+      gamma: 0.15
+      motion_model: "DiffDrive"
       visualize: false
       reset_period: 1.0 # (only in Humble)
       regenerate_noises: false
@@ -168,7 +168,7 @@ local_costmap:
           topic: /obstacle_points
           data_type: "PointCloud2"
 
-          min_obstacle_height: 0.12
+          min_obstacle_height: 0.0
           max_obstacle_height: 0.6
 
           obstacle_max_range: 3.0
@@ -196,6 +196,8 @@ global_costmap:
       footprint: "[ [0.325, 0.15], [0.325, -0.15], [-0.325, -0.15], [-0.325, 0.15] ]"
       plugins: ["voxel_layer", "inflation_layer"]
       rolling_window: true
+      width: 100
+      height: 100
       # plugins: ["obstacle_layer", "inflation_layer"]
 
       voxel_layer:
@@ -214,7 +216,7 @@ global_costmap:
         pointcloud: # no frame set, uses frame from message
           topic: /obstacle_points
           max_obstacle_height: 0.6
-          min_obstacle_height: 0.12
+          min_obstacle_height: 0.0
           obstacle_max_range: 3.0
           obstacle_min_range: 0.1
           raytrace_max_range: 4.0
@@ -324,7 +326,7 @@ collision_monitor:
     pointcloud_source:
       type: "pointcloud"
       topic: "/obstacle_points" # The launch file will remap this to your actual topic
-      min_height: 0.0
+      min_height: 0.1
       max_height: 2.0
       enabled: True
 
@@ -335,7 +337,7 @@ collision_monitor:
       # Define a 0.6m x 0.6m stop box centered on the robot
       points: "[[0.35, 0.16], [0.35, -0.16], [-0.35, -0.16], [-0.35, 0.16]]"
       action_type: "stop"
-      min_points: 4
+      min_points: 10
       visualize: True
       polygon_pub_topic: "polygon_stop"
 
@@ -344,10 +346,10 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "CLOSED_LOOP" # Use OPEN_LOOP if you don't have good wheel encoder feedback
-    max_velocity: [0.75, 0.3, 1.9] # x, y, theta
-    min_velocity: [-0.4, -0.3, -1.9]
-    max_accel: [1.5, 1.5, 2.0]
-    max_decel: [-1.5, -1.5, -2.0]
+    max_velocity: [1.0, 0.3, 1.9] # x, y, theta
+    min_velocity: [-0.5, -0.3, -1.9]
+    max_accel: [5.0, 5.0, 6.28]
+    max_decel: [-5.0, -5.0, -6.28]
     odom_topic: "odom"
     robot_base_frame: "base_link"
 

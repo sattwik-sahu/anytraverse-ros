@@ -69,18 +69,30 @@ def generate_launch_description():
     )
 
     # Start the camera
-    oakd_node = Node(
-        package="oakd_ros",
-        executable="oakd_node",
-        name="oakd_node",
-        output="screen",
-        remappings={
-            "/oakd/rgb/image_raw": LaunchConfiguration("camera_rgb_topic"),
-            "/oakd/rgb/camera_info": LaunchConfiguration("camera_rgb_info_topic"),
-            "/oakd/depth/image_raw": LaunchConfiguration("camera_depth_topic"),
-            "/oakd/depth/camera_info": LaunchConfiguration("camera_depth_info_topic"),
+    oakd_launch_path = os.path.join(
+        get_package_share_directory("oakd_ros"), "launch", "oakd.launch.py"
+    )
+    oakd_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(oakd_launch_path),
+        launch_arguments={
+            "camera_rgb_topic": LaunchConfiguration("camera_rgb_topic"),
+            "camera_rgb_info_topic": LaunchConfiguration("camera_rgb_info_topic"),
+            "camera_depth_topic": LaunchConfiguration("camera_depth_topic"),
+            "camera_depth_info_topic": LaunchConfiguration("camera_depth_info_topic"),
         }.items(),
     )
+    # oakd_node = Node(
+    #     package="oakd_ros",
+    #     executable="oakd_node",
+    #     name="oakd_node",
+    #     output="screen",
+    #     remappings={
+    #         "/oakd/rgb/image_raw": LaunchConfiguration("camera_rgb_topic"),
+    #         "/oakd/rgb/camera_info": LaunchConfiguration("camera_rgb_info_topic"),
+    #         "/oakd/depth/image_raw": LaunchConfiguration("camera_depth_topic"),
+    #         "/oakd/depth/camera_info": LaunchConfiguration("camera_depth_info_topic"),
+    #     }.items(),
+    # )
 
     # Start the robot and navigation
     robot_launch_path = os.path.join(
@@ -192,11 +204,12 @@ def generate_launch_description():
             gated_cmd_vel_topic_arg,
             robot_arg,
             init_prompt_arg,
-            oakd_node,
+            # oakd_node,
+            oakd_launch,
             robot_launch,
             anytraverse_node,
             obstacle_pcl_node,
             navigation_launch,
-            # cmd_vel_gating_node,
+            cmd_vel_gating_node,
         ]
     )
