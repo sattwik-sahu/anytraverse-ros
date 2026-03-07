@@ -195,8 +195,8 @@ class AnyTraverseNode(Node):
         unc_np = _to_uint8_img(unc_map)
 
         # Compress the traversability and uncertainty maps
-        trav_map_msg = self._bridge.cv2_to_imgmsg(trav_np)
-        unc_map_msg = self._bridge.cv2_to_imgmsg(unc_np)
+        trav_map_msg = self._bridge.cv2_to_imgmsg(trav_np, encoding="rgb8")
+        unc_map_msg = self._bridge.cv2_to_imgmsg(unc_np, encoding="rgb8")
         trav_map_msg.header = incoming_header
         unc_map_msg.header = incoming_header
 

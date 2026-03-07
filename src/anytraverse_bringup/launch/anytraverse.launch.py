@@ -1,6 +1,7 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import (
     PythonLaunchDescriptionSource,
@@ -12,11 +13,10 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
-from launch import LaunchDescription
-
 
 def generate_launch_description():
     anytraverse_bringup_share_dir = get_package_share_directory("anytraverse_bringup")
+    anytraverse_share_dir = get_package_share_directory("anytraverse_ros")
     moonlab_robots_share_dir = get_package_share_directory("moonlab_robots")
 
     # Args
@@ -29,6 +29,11 @@ def generate_launch_description():
         "trav_map_topic",
         default_value="/anytraverse/trav_map",
         description="Topic to remap for traversability map",
+    )
+    unc_map_topic_arg = DeclareLaunchArgument(
+        "unc_map_topic",
+        default_value="/anytraverse/unc_map",
+        description="Topic to remap for uncertainty map",
     )
     robot_arg = DeclareLaunchArgument(
         "robot", default_value="default", description="Name of the robot to launch"
@@ -121,24 +126,38 @@ def generate_launch_description():
             [LaunchConfiguration("robot"), ".yaml"],
         ]
     )
-    anytraverse_node = Node(
-        package="anytraverse_ros",
-        executable="anytraverse_node",
-        name="anytraverse_node",
-        output="screen",
-        parameters=[
-            anytraverse_params_file_path,
-            {
-                "init_prompt": ParameterValue(
-                    LaunchConfiguration("init_prompt"), value_type=str
-                )
-            },
-        ],
-        remappings=[
-            ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
-            ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
-        ],
+    anytraverse_launch = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource(
+            launch_file_path=os.path.join(
+                anytraverse_share_dir, "launch", "anytraverse.launch.py"
+            ),
+        ),
+        launch_arguments={
+            "params_file": anytraverse_params_file_path,
+            "init_prompt": LaunchConfiguration("init_prompt"),
+            "rgb_topic": LaunchConfiguration("camera_rgb_topic"),
+            "trav_map_topic": LaunchConfiguration("trav_map_topic"),
+            "unc_map_topic": LaunchConfiguration("unc_map_topic"),
+        }.items(),
     )
+    # anytraverse_node = Node(
+    #     package="anytraverse_ros",
+    #     executable="anytraverse_node",
+    #     name="anytraverse_node",
+    #     output="screen",
+    #     parameters=[
+    #         anytraverse_params_file_path,
+    #         {
+    #             "init_prompt": ParameterValue(
+    #                 LaunchConfiguration("init_prompt"), value_type=str
+    #             )
+    #         },
+    #     ],
+    #     remappings=[
+    #         ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
+    #         ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
+    #     ],
+    # )
 
     cmd_vel_gating_node = Node(
         package="anytraverse_ros",
@@ -196,6 +215,7 @@ def generate_launch_description():
         [
             obstacle_topic_arg,
             trav_map_topic_arg,
+            unc_map_topic_arg,
             camera_rgb_topic_arg,
             camera_rgb_info_topic_arg,
             camera_depth_topic_arg,
@@ -204,10 +224,9 @@ def generate_launch_description():
             gated_cmd_vel_topic_arg,
             robot_arg,
             init_prompt_arg,
-            # oakd_node,
             oakd_launch,
             robot_launch,
-            anytraverse_node,
+            anytraverse_launch,
             obstacle_pcl_node,
             navigation_launch,
             cmd_vel_gating_node,
