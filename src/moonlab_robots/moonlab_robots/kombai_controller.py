@@ -26,7 +26,7 @@ class ZMQPublisher[TMessage](ABC):
         socket (zmq.Socket): The PUB socket.
     """
 
-    def __init__(self, address: str = "tcp:") -> None:
+    def __init__(self, address: str) -> None:
         """
         Initializes the ZMQPublisher.
 
@@ -95,8 +95,8 @@ class KombaiControllerNode(Node):
 
     def _cmd_vel_callback(self, msg: Twist) -> None:
         command: RobotCommand = {
-            "velocity": (msg.linear.x * 10.0, msg.linear.y * 10.0),
-            "yaw_speed": msg.angular.z * 10.0,
+            "velocity": (msg.linear.x, msg.linear.y),
+            "yaw_speed": msg.angular.z,
         }
         self.get_logger().info(f"Sending command: {command}")
         self._publisher.send(topic="cmd_vel", message=command)

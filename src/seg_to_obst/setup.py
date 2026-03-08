@@ -1,8 +1,6 @@
 from setuptools import find_packages, setup
-import os
-from glob import glob
 
-package_name = "anytraverse_ros"
+package_name = "seg_to_obst"
 
 setup(
     name=package_name,
@@ -11,21 +9,21 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
-        (os.path.join("share", package_name, "launch"), glob("launch/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
     maintainer="moonlab",
     maintainer_email="sattwik21@iiserb.ac.in",
     description="TODO: Package description",
-    license="MIT",
+    license="Apache-2.0",
     extras_require={
-        "test": ["pytest"],
+        "test": [
+            "pytest",
+        ],
     },
     entry_points={
         "console_scripts": [
-            "anytraverse_node = anytraverse_ros.anytraverse_node:main",
-            "cmd_vel_gating_node = anytraverse_ros.cmd_vel_gating:main",
+            "seg_to_obst_pcl_node = seg_to_obst.seg_to_obst_pcl_node:main"
         ],
     },
 )

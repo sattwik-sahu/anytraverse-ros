@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find oakd_ros)/xacro/oakd.xacro" />
+
+    <xacro:arg name="config_path" default="" />
+    <xacro:arg name="robot_name" default="moonlab_robot" />
+
+    <xacro:property name="data" value="${xacro.load_yaml('$(arg config_path)')}" />
+
+    <link name="base_link" />
+
+    <xacro:oakd_camera
+        parent_link="base_link"
+        xyz="${data['x']} ${data['y']} ${data['z']}"
+        rpy="${data['roll']} ${data['pitch']} ${data['yaw']}" />
+
+</robot>

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="oakd_camera" params="parent_link xyz rpy">
+
+    <!-- Main camera link (no visuals, just TF anchor) -->
+    <link name="oakd_link"/>
+
+    <joint name="oakd_joint" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="oakd_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- RGB Optical Frame (REQUIRED for ROS cameras) -->
+    <link name="oakd_rgb_optical_frame"/>
+    <joint name="oakd_rgb_optical_joint" type="fixed">
+      <parent link="oakd_link"/>
+      <child link="oakd_rgb_optical_frame"/>
+      <!-- ROS optical frame convention -->
+      <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+    </joint>
+
+    <!-- IMU Frame -->
+    <link name="oakd_imu_frame"/>
+    <joint name="oakd_imu_joint" type="fixed">
+      <parent link="oakd_link"/>
+      <child link="oakd_imu_frame"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+  </xacro:macro>
+
+</robot>

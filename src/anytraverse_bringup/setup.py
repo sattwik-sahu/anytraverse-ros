@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
-import os
 from glob import glob
+import os
 
-package_name = "trav_map_navigation"
+package_name = "anytraverse_bringup"
 
 setup(
     name=package_name,
@@ -19,15 +19,13 @@ setup(
     maintainer="moonlab",
     maintainer_email="sattwik21@iiserb.ac.in",
     description="TODO: Package description",
-    license="MIT",
+    license="Apache-2.0",
     extras_require={
         "test": [
             "pytest",
         ],
     },
     entry_points={
-        "console_scripts": [
-            "obstacle_pcl_node = trav_map_navigation.obstacle_pcl_node:main"
-        ],
+        "console_scripts": [],
     },
 )
