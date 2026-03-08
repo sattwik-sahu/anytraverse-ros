@@ -11,7 +11,6 @@ from launch.substitutions import (
     PathJoinSubstitution,
 )
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -86,18 +85,6 @@ def generate_launch_description():
             "camera_depth_info_topic": LaunchConfiguration("camera_depth_info_topic"),
         }.items(),
     )
-    # oakd_node = Node(
-    #     package="oakd_ros",
-    #     executable="oakd_node",
-    #     name="oakd_node",
-    #     output="screen",
-    #     remappings={
-    #         "/oakd/rgb/image_raw": LaunchConfiguration("camera_rgb_topic"),
-    #         "/oakd/rgb/camera_info": LaunchConfiguration("camera_rgb_info_topic"),
-    #         "/oakd/depth/image_raw": LaunchConfiguration("camera_depth_topic"),
-    #         "/oakd/depth/camera_info": LaunchConfiguration("camera_depth_info_topic"),
-    #     }.items(),
-    # )
 
     # Start the robot and navigation
     robot_launch_path = os.path.join(
