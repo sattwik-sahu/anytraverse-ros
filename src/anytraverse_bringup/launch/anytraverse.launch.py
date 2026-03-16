@@ -17,6 +17,7 @@ def generate_launch_description():
     anytraverse_bringup_share_dir = get_package_share_directory("anytraverse_bringup")
     anytraverse_share_dir = get_package_share_directory("anytraverse_ros")
     moonlab_robots_share_dir = get_package_share_directory("moonlab_robots")
+    oakd_ros_share_dir = get_package_share_directory("oakd_ros")
 
     # Args
     obstacle_topic_arg = DeclareLaunchArgument(
@@ -73,9 +74,7 @@ def generate_launch_description():
     )
 
     # Start the camera
-    oakd_launch_path = os.path.join(
-        get_package_share_directory("oakd_ros"), "launch", "oakd.launch.py"
-    )
+    oakd_launch_path = os.path.join(oakd_ros_share_dir, "launch", "oakd.launch.py")
     oakd_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(oakd_launch_path),
         launch_arguments={
@@ -127,24 +126,6 @@ def generate_launch_description():
             "unc_map_topic": LaunchConfiguration("unc_map_topic"),
         }.items(),
     )
-    # anytraverse_node = Node(
-    #     package="anytraverse_ros",
-    #     executable="anytraverse_node",
-    #     name="anytraverse_node",
-    #     output="screen",
-    #     parameters=[
-    #         anytraverse_params_file_path,
-    #         {
-    #             "init_prompt": ParameterValue(
-    #                 LaunchConfiguration("init_prompt"), value_type=str
-    #             )
-    #         },
-    #     ],
-    #     remappings=[
-    #         ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
-    #         ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
-    #     ],
-    # )
 
     cmd_vel_gating_node = Node(
         package="anytraverse_ros",
