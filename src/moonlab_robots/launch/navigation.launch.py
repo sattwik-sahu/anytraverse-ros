@@ -4,7 +4,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node, SetRemap
+from launch_ros.actions import Node, SetRemap, PushRosNamespace
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -25,14 +25,22 @@ def generate_launch_description():
     )
 
     # Added this arg for easy switching to Webots later
-    sim_time_arg = DeclareLaunchArgument(
+    use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
-        default_value="False",
+        default_value="false",
         description="Use simulation (Gazebo/Webots) clock if True",
+    )
+
+    # Namespace arg
+    namespace_arg = DeclareLaunchArgument(
+        "namespace",
+        default_value="",
+        description="Robot namespace",
     )
 
     nav2_group = GroupAction(
         actions=[
+            PushRosNamespace(LaunchConfiguration("namespace")),
             SetRemap(src="/obstacle_points", dst=LaunchConfiguration("obstacle_topic")),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
@@ -43,7 +51,7 @@ def generate_launch_description():
                 launch_arguments={
                     "params_file": LaunchConfiguration("params_file"),
                     "use_sim_time": LaunchConfiguration("use_sim_time"),
-                    "autostart": "True",
+                    "autostart": "true",
                 }.items(),
             ),
         ]
@@ -53,7 +61,8 @@ def generate_launch_description():
         [
             obstacle_topic_arg,
             params_file_arg,
-            sim_time_arg,
+            use_sim_time_arg,
+            namespace_arg,
             nav2_group,
         ]
     )
