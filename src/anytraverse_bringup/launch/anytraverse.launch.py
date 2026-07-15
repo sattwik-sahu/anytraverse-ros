@@ -11,13 +11,13 @@ from launch.substitutions import (
     PathJoinSubstitution,
 )
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
     anytraverse_bringup_share_dir = get_package_share_directory("anytraverse_bringup")
     anytraverse_share_dir = get_package_share_directory("anytraverse_ros")
     moonlab_robots_share_dir = get_package_share_directory("moonlab_robots")
+    oakd_ros_share_dir = get_package_share_directory("oakd_ros")
 
     # Args
     obstacle_topic_arg = DeclareLaunchArgument(
@@ -74,9 +74,7 @@ def generate_launch_description():
     )
 
     # Start the camera
-    oakd_launch_path = os.path.join(
-        get_package_share_directory("oakd_ros"), "launch", "oakd.launch.py"
-    )
+    oakd_launch_path = os.path.join(oakd_ros_share_dir, "launch", "oakd.launch.py")
     oakd_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(oakd_launch_path),
         launch_arguments={
@@ -86,18 +84,6 @@ def generate_launch_description():
             "camera_depth_info_topic": LaunchConfiguration("camera_depth_info_topic"),
         }.items(),
     )
-    # oakd_node = Node(
-    #     package="oakd_ros",
-    #     executable="oakd_node",
-    #     name="oakd_node",
-    #     output="screen",
-    #     remappings={
-    #         "/oakd/rgb/image_raw": LaunchConfiguration("camera_rgb_topic"),
-    #         "/oakd/rgb/camera_info": LaunchConfiguration("camera_rgb_info_topic"),
-    #         "/oakd/depth/image_raw": LaunchConfiguration("camera_depth_topic"),
-    #         "/oakd/depth/camera_info": LaunchConfiguration("camera_depth_info_topic"),
-    #     }.items(),
-    # )
 
     # Start the robot and navigation
     robot_launch_path = os.path.join(
@@ -140,24 +126,6 @@ def generate_launch_description():
             "unc_map_topic": LaunchConfiguration("unc_map_topic"),
         }.items(),
     )
-    # anytraverse_node = Node(
-    #     package="anytraverse_ros",
-    #     executable="anytraverse_node",
-    #     name="anytraverse_node",
-    #     output="screen",
-    #     parameters=[
-    #         anytraverse_params_file_path,
-    #         {
-    #             "init_prompt": ParameterValue(
-    #                 LaunchConfiguration("init_prompt"), value_type=str
-    #             )
-    #         },
-    #     ],
-    #     remappings=[
-    #         ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
-    #         ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
-    #     ],
-    # )
 
     cmd_vel_gating_node = Node(
         package="anytraverse_ros",
