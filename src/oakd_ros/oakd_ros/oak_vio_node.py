@@ -326,7 +326,7 @@ class OakVIONode(Node):
                 msg=self._tf_buffer.lookup_transform(
                     self._base_frame_id,
                     self._odom_child_frame_id,
-                    self.get_clock().now(),
+                    rclpy.time.Time(),
                 )
             )
             tf_odom_child = pose_to_transformation_matrix(
