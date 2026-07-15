@@ -161,5 +161,5 @@ def pose_to_transformation_matrix(
 ) -> npt.NDArray[np.float64]:
     matrix = np.eye(4)
     matrix[:3, :3] = Rotation.from_quat(quat=q).as_matrix()
-    matrix[:, 3] = t
+    matrix[:3, 3] = t
     return matrix
