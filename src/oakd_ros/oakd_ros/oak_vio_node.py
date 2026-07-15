@@ -334,7 +334,7 @@ class OakVIONode(Node):
             )
             tf_odom_base = tf_odom_child @ np.linalg.inv(tf_base_child)
             msg = transformation_matrix_to_transform_stamped_msg(tf_odom_base)
-            msg.header.stamp = self.get_clock().now()
+            msg.header.stamp = self.get_clock().now().to_msg()
             msg.header.frame_id = self._base_frame_id
             msg.child_frame_id = self._odom_child_frame_id
             self._tf_broadcaster.sendTransform(transform=msg)
