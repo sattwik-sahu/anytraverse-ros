@@ -127,6 +127,8 @@ class OakVIONode(Node):
             callback_group=self._odom_callback_group,
         )
 
+        self._pipeline.start()
+
     def _setup_depthai_pipeline(self) -> None:
         """Setup the depthai pipeline for the node."""
 
