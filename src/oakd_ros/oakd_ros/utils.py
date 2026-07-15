@@ -3,8 +3,10 @@ from datetime import timedelta
 import depthai
 import numpy as np
 from builtin_interfaces.msg import Time
+from geometry_msgs.msg import TransformStamped
 from numpy import typing as npt
 from rclpy.time import Time as ROSTime
+from scipy.spatial.transform import Rotation
 from sensor_msgs.msg import CameraInfo
 
 
@@ -113,3 +115,51 @@ def set_stereo_preset(stereo: depthai.node.StereoDepth) -> None:
     # stereo.initialConfig.setMedianFilter(depthai.MedianFilter.KERNEL_7x7)
 
     stereo.setLeftRightCheck(True)
+
+
+def transformation_matrix_to_transform_stamped_msg(
+    tf_matrix: npt.NDArray[np.float64],
+) -> TransformStamped:
+    msg = TransformStamped()
+
+    msg.transform.translation.x = tf_matrix[0, 3]
+    msg.transform.translation.y = tf_matrix[1, 3]
+    msg.transform.translation.z = tf_matrix[2, 3]
+
+    qx, qy, qz, qw = Rotation.from_matrix(matrix=tf_matrix[:3, :3]).as_quat().flatten()
+    msg.transform.rotation.x = qx
+    msg.transform.rotation.y = qy
+    msg.transform.rotation.z = qz
+    msg.transform.rotation.w = qw
+
+    return msg
+
+
+def transform_stamped_msg_to_transformation_matrix(
+    msg: TransformStamped,
+) -> npt.NDArray[np.float64]:
+    tf_matrix = np.eye(4, dtype=np.float64)
+
+    tf_matrix[:3, :3] = Rotation.from_quat(
+        [
+            msg.transform.rotation.x,
+            msg.transform.rotation.y,
+            msg.transform.rotation.z,
+            msg.transform.rotation.w,
+        ]
+    ).as_matrix()
+
+    tf_matrix[0, 3] = msg.transform.translation.x
+    tf_matrix[1, 3] = msg.transform.translation.y
+    tf_matrix[2, 3] = msg.transform.translation.z
+
+    return tf_matrix
+
+
+def pose_to_transformation_matrix(
+    q: list[float], t: list[float]
+) -> npt.NDArray[np.float64]:
+    matrix = np.eye(4)
+    matrix[:3, :3] = Rotation.from_quat(quat=q).as_matrix()
+    matrix[:, 3] = t
+    return matrix

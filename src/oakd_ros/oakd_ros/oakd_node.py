@@ -1,6 +1,7 @@
 import depthai
 import numpy as np
 import rclpy
+from cv_bridge import CvBridge
 from numpy import typing as npt
 from rclpy.node import Node as Node
 from rclpy.publisher import Publisher
@@ -12,8 +13,6 @@ from oakd_ros.utils import (
     build_camera_info,
     set_stereo_preset,
 )
-
-from cv_bridge import CvBridge
 
 
 class OakdCameraNode(Node):
@@ -147,7 +146,7 @@ class OakdCameraNode(Node):
         frame: depthai.ImgFrame | None = self._rgb_queue.tryGet()  # type: ignore
         if frame is not None:
             ros_timestamp = self.get_clock().now().to_msg()
-            cv_image: npt.NDArray[np.uint8] = frame.getCvFrame()  # type: ignore
+            cv_image: npt.NDArray[np.uint8] = frame.getCvFrame()
 
             # Construct messages
             image_msg: Image = self._cv_bridge.cv2_to_imgmsg(cv_image, encoding="bgr8")
@@ -163,7 +162,7 @@ class OakdCameraNode(Node):
         frame: depthai.ImgFrame | None = self._depth_queue.tryGet()  # type: ignore
         if frame is not None:
             ros_timestamp = self.get_clock().now().to_msg()
-            depth_np: npt.NDArray[np.uint16] = frame.getFrame()  # type: ignore
+            depth_np: npt.NDArray[np.uint16] = frame.getFrame()
 
             # Construct messages
             depth_msg = self._cv_bridge.cv2_to_imgmsg(depth_np, encoding="16UC1")

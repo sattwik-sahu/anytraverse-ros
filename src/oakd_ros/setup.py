@@ -1,6 +1,7 @@
-from setuptools import find_packages, setup
 import os
 from glob import glob
+
+from setuptools import find_packages, setup
 
 package_name = "oakd_ros"
 
@@ -26,6 +27,9 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["oakd_node = oakd_ros.oakd_node:main"],
+        "console_scripts": [
+            "oakd_node = oakd_ros.oakd_node:main",
+            "oak_vio_node = oakd_ros.oak_vio_node:main",
+        ],
     },
 )

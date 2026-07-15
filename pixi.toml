@@ -39,6 +39,7 @@ libgl-devel = "*"
 # and can be activated using the `pixi run/shell -e <environment>` command.
 [environments]
 jazzy = { features = ["jazzy", "build"] }
+kilted = { features = ["kilted", "build"] }
 
 [pypi-dependencies]
 torch = ">=2.7.1, <3"
@@ -72,3 +73,18 @@ ros-jazzy-compressed-depth-image-transport = "*"
 ros-jazzy-compressed-image-transport = "*"
 ros-jazzy-message-filters = "*"
 ros-jazzy-rmw-zenoh-cpp = "*"
+
+### ROS Kilted ####
+[feature.kilted]
+channels = ["https://prefix.dev/robostack-kilted"]
+
+[feature.kilted.dependencies]
+ros-kilted-desktop = "*"
+ros-kilted-navigation2 = "*"
+ros-kilted-nav2-costmap-2d = "*"
+ros-kilted-nav2-bringup = "*"
+ros-kilted-foxglove-bridge = "*"
+ros-kilted-compressed-depth-image-transport = "*"
+ros-kilted-compressed-image-transport = "*"
+ros-kilted-message-filters = "*"
+ros-kilted-rmw-zenoh-cpp = "*"
