@@ -1,11 +1,7 @@
-import time
-
 import depthai
 import numpy as np
 import rclpy
 from cv_bridge.core import CvBridge
-from depthai.node import node
-from geometry_msgs.msg import TransformStamped
 from numpy import typing as npt
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import ExternalShutdownException
@@ -13,7 +9,6 @@ from rclpy.node import Node as Node
 from rclpy.publisher import Publisher
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from rclpy.timer import Timer
-from scipy.spatial.transform import Rotation
 from sensor_msgs.msg import CameraInfo, Image, Imu
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_broadcaster import TransformBroadcaster
