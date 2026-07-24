@@ -1,7 +1,10 @@
+import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
@@ -14,6 +17,9 @@ def generate_launch_description():
     )
     depth_topic_arg = DeclareLaunchArgument(
         "camera_depth_topic", default_value="/oakd/depth/image_raw"
+    )
+    camera_frame_id_arg = DeclareLaunchArgument(
+        "camera_frame_id", default_value="camera_frame"
     )
 
     # 2. Substitutions
@@ -54,12 +60,24 @@ def generate_launch_description():
         output="screen",
     )
 
+    # Launching the OAK camera description
+    depthai_descriptions_launch = os.path.join(
+        get_package_share_directory("depthai_descriptions"), "launch", "urdf_launch.py"
+    )
+    camera_frame = LaunchConfiguration("camera_frame_id")
+    depthai_urdf_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(depthai_descriptions_launch),
+        launch_arguments={"parent_frame": camera_frame}.items(),
+    )
+
     return LaunchDescription(
         [
             rgb_topic_arg,
             rgb_info_topic_arg,
             depth_topic_arg,
+            camera_frame_id_arg,
             oakd_node,
             rgb_republisher,
+            depthai_urdf_launch,
         ]
     )

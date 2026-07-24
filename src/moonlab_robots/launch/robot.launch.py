@@ -1,49 +1,50 @@
 import os
+import yaml
+
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
+def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "robot",
-                default_value="kombai",
-                description="Name of the robot (key in the YAML config)",
-            ),
+            DeclareLaunchArgument("robot", default_value="robot"),
+            DeclareLaunchArgument("base_frame_id", default_value="base_link"),
+            DeclareLaunchArgument("camera_frame_id", default_value="camera_frame"),
             OpaqueFunction(function=launch_setup),
         ]
     )
 
 
-def launch_setup(context, *args, **kwargs):
-    # Resolve the configurations
-    robot_name = LaunchConfiguration("robot").perform(context)
+def launch_setup(context, *args, **kwargs) -> list[Node]:
+    robot = LaunchConfiguration("robot").perform(context=context)
+    base_frame = LaunchConfiguration("base_frame_id").perform(context=context)
+    camera_frame = LaunchConfiguration("camera_frame_id").perform(context=context)
+
     pkg_path = get_package_share_directory("moonlab_robots")
+    config_file = os.path.join(pkg_path, "config", robot, "camera_mount.yaml")
 
-    urdf_file = os.path.join(pkg_path, "urdf", "robot.urdf.xacro")
-    config_file = os.path.join(pkg_path, "config", robot_name, "camera_mount.yaml")
-
-    # Pass the file path and robot name as Xacro arguments
-    robot_description_content = Command(
-        [
-            "xacro ",
-            urdf_file,
-            " config_path:=",
-            config_file,
-            " robot_name:=",
-            robot_name,
-        ]
-    )
+    with open(config_file, "r") as f:
+        config = yaml.safe_load(f)
 
     return [
         Node(
-            package="robot_state_publisher",
-            executable="robot_state_publisher",
-            name="robot_state_publisher",
-            parameters=[{"robot_description": robot_description_content}],
+            package="tf2_ros",
+            executable="static_transform_publisher",
+            name="camera_static_tf",
+            arguments=[
+                str(config["x"]),
+                str(config["y"]),
+                str(config["z"]),
+                str(config["roll"]),
+                str(config["pitch"]),
+                str(config["yaw"]),
+                base_frame,
+                camera_frame,
+            ],
         )
     ]

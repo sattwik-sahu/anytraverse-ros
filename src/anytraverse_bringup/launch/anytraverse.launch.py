@@ -140,24 +140,6 @@ def generate_launch_description():
             "unc_map_topic": LaunchConfiguration("unc_map_topic"),
         }.items(),
     )
-    # anytraverse_node = Node(
-    #     package="anytraverse_ros",
-    #     executable="anytraverse_node",
-    #     name="anytraverse_node",
-    #     output="screen",
-    #     parameters=[
-    #         anytraverse_params_file_path,
-    #         {
-    #             "init_prompt": ParameterValue(
-    #                 LaunchConfiguration("init_prompt"), value_type=str
-    #             )
-    #         },
-    #     ],
-    #     remappings=[
-    #         ("/camera/rgb/image_raw", LaunchConfiguration("camera_rgb_topic")),
-    #         ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
-    #     ],
-    # )
 
     cmd_vel_gating_node = Node(
         package="anytraverse_ros",
