@@ -85,35 +85,35 @@ def camera_info_msg(
 
 class OakDNode(Node):
     def __init__(self):
-        super().__init__("oakd_publisher")
+        super().__init__("oak_vio_node")
 
         # Parametrized properties
-        self.declare_parameter("rgb_width", 640)
-        self.declare_parameter("rgb_height", 480)
-        self.declare_parameter("mono_width", 640)
-        self.declare_parameter("mono_height", 400)
-        self.declare_parameter("fps", 30.0)
-        self.declare_parameter("imu_hz", 200)
+        self.declare_parameters(
+            namespace="",
+            parameters=[
+                ("rgb_size", [640, 480]),
+                ("mono_size", [640, 400]),
+                ("fps", 30),
+                ("imu_hz", 200),
+                ("camera_optical_frame_id", "oak_rgb_camera_optical_frame"),
+                ("imu_frame_id", "oak_imu_frame"),
+                ("base_frame_id", "base_link"),
+                ("odom_frame_id", "odom"),
+            ],
+        )
 
-        self.declare_parameter("camera_optical_frame", "oak_camera_optical_frame")
-        self.declare_parameter("imu_frame", "oak_imu_frame")
-        self.declare_parameter("base_frame", "base_link")
-        self.declare_parameter("odom_frame", "odom")
+        # Retrieve parameter values
+        self.rgb_size: tuple[int, int] = tuple(self.get_parameter("rgb_size").value)
+        self.mono_size: tuple[int, int] = tuple(self.get_parameter("mono_size").value)
+        self.fps: int = self.get_parameter("fps").value
+        self.imu_hz: int = self.get_parameter("imu_hz").value
 
-        self.rgb_width = self.get_parameter("rgb_width").value
-        self.rgb_height = self.get_parameter("rgb_height").value
-        self.mono_width = self.get_parameter("mono_width").value
-        self.mono_height = self.get_parameter("mono_height").value
-        self.fps = self.get_parameter("fps").value
-        self.imu_hz = self.get_parameter("imu_hz").value
-
-        self.camera_optical_frame_id = self.get_parameter("camera_optical_frame").value
-        self.imu_frame_id = self.get_parameter("imu_frame").value
-        self.base_frame_id = self.get_parameter("base_frame").value
-        self.odom_frame_id = self.get_parameter("odom_frame").value
-
-        self.rgb_size = (self.rgb_width, self.rgb_height)
-        self.mono_size = (self.mono_width, self.mono_height)
+        self.camera_optical_frame_id: str = self.get_parameter(
+            "camera_optical_frame_id"
+        ).value
+        self.imu_frame_id: str = self.get_parameter("imu_frame_id").value
+        self.base_frame_id: str = self.get_parameter("base_frame_id").value
+        self.odom_frame_id: str = self.get_parameter("odom_frame_id").value
 
         sensor_qos = QoSProfile(
             depth=5,
@@ -245,18 +245,19 @@ class OakDNode(Node):
         device = self.pipeline.getDefaultDevice()
         calib = device.readCalibration()
 
+        w, h = self.rgb_size
         self._camera_info_msg = camera_info_msg(
             calib,
             RGB_SOCKET,
-            self.rgb_width,
-            self.rgb_height,
+            w,
+            h,
             self.camera_optical_frame_id,
         )
         self._depth_info_msg = camera_info_msg(
             calib,
             RGB_SOCKET,
-            self.rgb_width,
-            self.rgb_height,
+            w,
+            h,
             self.camera_optical_frame_id,
         )
 
