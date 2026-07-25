@@ -61,6 +61,11 @@ def generate_launch_description():
         default_value="/camera/depth/camera_info",
         description="Topic for the depth camera info",
     )
+    imu_topic_arg = DeclareLaunchArgument(
+        name="imu_topic",
+        default_value="oak/imu/data",
+        description="Topic for the IMU data feed",
+    )
     camera_frame_id_arg = DeclareLaunchArgument(
         name="camera_frame_id",
         default_value="camera_frame",
@@ -75,6 +80,11 @@ def generate_launch_description():
         name="gated_cmd_vel_topic",
         default_value="/anytraverse/cmd_vel",
         description="Topic for AnyTraverse gated cmd_vel output (for HOC)",
+    )
+    use_sim_time_arg = DeclareLaunchArgument(
+        name="use_sim_time",
+        default_value="False",
+        description="Use simulation clock if True",
     )
 
     # Start the camera
@@ -135,7 +145,7 @@ def generate_launch_description():
         ],
     )
 
-    # 4. Start the 'obstacle_pcl_node' with remappings
+    # Start the 'obstacle_pcl_node' with remappings
     obstacle_pcl_node = Node(
         package="seg_to_obst",
         executable="seg_to_obst_pcl_node",
@@ -176,6 +186,7 @@ def generate_launch_description():
         launch_arguments={
             "obstacle_topic": LaunchConfiguration("obstacle_topic"),
             "params_file": nav_params_file_path,
+            "use_sim_time": LaunchConfiguration("use_sim_time"),
         }.items(),
     )
 
@@ -188,11 +199,13 @@ def generate_launch_description():
             camera_rgb_info_topic_arg,
             camera_depth_topic_arg,
             camera_depth_info_topic_arg,
+            imu_topic_arg,
             camera_optical_frame_id_arg,
             camera_frame_id_arg,
             gated_cmd_vel_topic_arg,
             robot_arg,
             init_prompt_arg,
+            use_sim_time_arg,
             oakd_launch,
             robot_launch,
             anytraverse_launch,
