@@ -1,7 +1,7 @@
 from launch import LaunchDescription as LaunchDescription
-from launch_ros.actions import Node as Node
 from launch.actions import DeclareLaunchArgument as DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration as LaunchConfiguration
+from launch_ros.actions import Node as Node
 from launch_ros.parameter_descriptions import ParameterValue as ParameterValue
 
 
@@ -45,11 +45,11 @@ def generate_launch_description():
                 ),
             },
         ],
-        remappings={
-            "/camera/rgb/image_raw": LaunchConfiguration("rgb_topic"),
-            "/anytraverse/trav_map": LaunchConfiguration("trav_map_topic"),
-            "/anytraverse/unc_map": LaunchConfiguration("unc_map_topic"),
-        }.items(),
+        remappings=[
+            ("/camera/rgb/image_raw", LaunchConfiguration("rgb_topic")),
+            ("/anytraverse/trav_map", LaunchConfiguration("trav_map_topic")),
+            ("/anytraverse/unc_map", LaunchConfiguration("unc_map_topic")),
+        ],
     )
 
     # Create republishers for the traversability and uncertainty maps

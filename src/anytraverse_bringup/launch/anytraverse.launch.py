@@ -11,7 +11,6 @@ from launch.substitutions import (
     PathJoinSubstitution,
 )
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -62,8 +61,13 @@ def generate_launch_description():
         default_value="/camera/depth/camera_info",
         description="Topic for the depth camera info",
     )
-    camera_optical_frame_arg = DeclareLaunchArgument(
-        name="camera_optical_frame",
+    camera_frame_id_arg = DeclareLaunchArgument(
+        name="camera_frame_id",
+        default_value="camera_frame",
+        description="TF frame ID for the camera frame",
+    )
+    camera_optical_frame_id_arg = DeclareLaunchArgument(
+        name="camera_optical_frame_id",
         default_value="camera_rgb_optical_frame",
         description="TF frame ID for the camera optical frame",
     )
@@ -75,7 +79,7 @@ def generate_launch_description():
 
     # Start the camera
     oakd_launch_path = os.path.join(
-        get_package_share_directory("oakd_ros"), "launch", "oakd.launch.py"
+        get_package_share_directory("oakd_ros"), "launch", "oak_vio.launch.py"
     )
     oakd_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(oakd_launch_path),
@@ -84,38 +88,18 @@ def generate_launch_description():
             "camera_rgb_info_topic": LaunchConfiguration("camera_rgb_info_topic"),
             "camera_depth_topic": LaunchConfiguration("camera_depth_topic"),
             "camera_depth_info_topic": LaunchConfiguration("camera_depth_info_topic"),
+            "imu_topic": LaunchConfiguration("imu_topic"),
+            "camera_frame_id": LaunchConfiguration("camera_frame_id"),
         }.items(),
     )
-    # oakd_node = Node(
-    #     package="oakd_ros",
-    #     executable="oakd_node",
-    #     name="oakd_node",
-    #     output="screen",
-    #     remappings={
-    #         "/oakd/rgb/image_raw": LaunchConfiguration("camera_rgb_topic"),
-    #         "/oakd/rgb/camera_info": LaunchConfiguration("camera_rgb_info_topic"),
-    #         "/oakd/depth/image_raw": LaunchConfiguration("camera_depth_topic"),
-    #         "/oakd/depth/camera_info": LaunchConfiguration("camera_depth_info_topic"),
-    #     }.items(),
-    # )
 
-    # Start the robot and navigation
+    # The robot launch files
     robot_launch_path = os.path.join(
         moonlab_robots_share_dir, "launch", "robot.launch.py"
     )
-    navigation_launch_path = os.path.join(
-        moonlab_robots_share_dir, "launch", "navigation.launch.py"
-    )
-
     robot_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(robot_launch_path),
         launch_arguments={"robot": LaunchConfiguration("robot")}.items(),
-    )
-    navigation_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(navigation_launch_path),
-        launch_arguments={
-            "obstacle_topic": LaunchConfiguration("obstacle_topic")
-        }.items(),
     )
 
     # Start AnyTraverse node
@@ -146,9 +130,9 @@ def generate_launch_description():
         executable="cmd_vel_gating_node",
         name="cmd_vel_gating",
         output="screen",
-        remappings={
-            "/anytraverse/cmd_vel": LaunchConfiguration("gated_cmd_vel_topic"),
-        }.items(),
+        remappings=[
+            ("/anytraverse/cmd_vel", LaunchConfiguration("gated_cmd_vel_topic")),
+        ],
     )
 
     # 4. Start the 'obstacle_pcl_node' with remappings
@@ -168,7 +152,9 @@ def generate_launch_description():
         ],
         parameters=[
             {
-                "camera_optical_frame_id": LaunchConfiguration("camera_optical_frame"),
+                "camera_optical_frame_id": LaunchConfiguration(
+                    "camera_optical_frame_id"
+                ),
             }
         ],
     )
@@ -202,7 +188,8 @@ def generate_launch_description():
             camera_rgb_info_topic_arg,
             camera_depth_topic_arg,
             camera_depth_info_topic_arg,
-            camera_optical_frame_arg,
+            camera_optical_frame_id_arg,
+            camera_frame_id_arg,
             gated_cmd_vel_topic_arg,
             robot_arg,
             init_prompt_arg,

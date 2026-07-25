@@ -26,10 +26,17 @@ def generate_launch_description():
     camera_frame_id_arg = DeclareLaunchArgument(
         "camera_frame_id", default_value="camera_frame"
     )
+    default_params_file = os.path.join(
+        get_package_share_directory("oakd_ros"), "config", "params.yaml"
+    )
+    params_file_arg = DeclareLaunchArgument(
+        name="params_file", default_value=default_params_file
+    )
 
     # 2. Substitutions
     rgb_in = LaunchConfiguration("camera_rgb_topic")
     depth_in = LaunchConfiguration("camera_depth_topic")
+    params_file = LaunchConfiguration("params_file")
 
     # 3. Driver Node
     oakd_node = Node(
@@ -38,12 +45,13 @@ def generate_launch_description():
         name="oak_vio_node",
         output="screen",
         remappings=[
-            ("/oak/rgb/image_raw", rgb_in),
-            ("/oak/depth/image_raw", depth_in),
-            ("/oak/rgb/camera_info", LaunchConfiguration("camera_rgb_info_topic")),
-            ("/oak/depth/camera_info", LaunchConfiguration("camera_depth_info_topic")),
-            ("/oak/imu/data", LaunchConfiguration("imu_topic")),
+            ("oak/camera/image_raw", rgb_in),
+            ("oak/camera/camera_info", LaunchConfiguration("camera_rgb_info_topic")),
+            ("oak/depth/image_raw", depth_in),
+            ("oak/depth/camera_info", LaunchConfiguration("camera_depth_info_topic")),
+            ("oak/imu/data", LaunchConfiguration("imu_topic")),
         ],
+        parameters=[params_file],
     )
 
     # 4. RGB Republisher
@@ -61,8 +69,8 @@ def generate_launch_description():
         # Fixes the "/out/compressed" naming error
         # Key must be just "in" and "out" (no slashes, no suffixes)
         remappings=[
-            ("/in", rgb_in),
-            ("/out/compressed", [rgb_in, "/compressed"]),
+            ("in", rgb_in),
+            ("out/compressed", [rgb_in, "/compressed"]),
         ],
         output="screen",
     )
@@ -74,7 +82,10 @@ def generate_launch_description():
     camera_frame = LaunchConfiguration("camera_frame_id")
     depthai_urdf_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(depthai_descriptions_launch),
-        launch_arguments={"parent_frame": camera_frame}.items(),
+        launch_arguments={
+            "parent_frame": camera_frame,
+            "camera_model": "OAK-D-PRO",
+        }.items(),
     )
 
     return LaunchDescription(
@@ -85,6 +96,7 @@ def generate_launch_description():
             depth_info_topic_arg,
             imu_topic_arg,
             camera_frame_id_arg,
+            params_file_arg,
             oakd_node,
             rgb_republisher,
             depthai_urdf_launch,

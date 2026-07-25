@@ -91,7 +91,7 @@ class OakDNode(Node):
         self.declare_parameters(
             namespace="",
             parameters=[
-                ("rgb_size", [640, 480]),
+                ("rgb_size", [640, 400]),
                 ("mono_size", [640, 400]),
                 ("fps", 30),
                 ("imu_hz", 200),
@@ -277,13 +277,18 @@ class OakDNode(Node):
                 camera_frame = self.camera_queue.get()
             except Exception:
                 continue
+
             if camera_frame is None:
                 continue
+
             stamp = self.get_clock().now().to_msg()
             self._safe_publish(
                 self.camera_pub,
                 image_msg(
-                    camera_frame.getFrame(), "bgr8", self.camera_optical_frame_id, stamp
+                    camera_frame.getFrame(),  # type: ignore
+                    "bgr8",
+                    self.camera_optical_frame_id,
+                    stamp,
                 ),
             )
             self._camera_info_msg.header.stamp = stamp
@@ -301,7 +306,10 @@ class OakDNode(Node):
             self._safe_publish(
                 self.depth_pub,
                 image_msg(
-                    depth_frame.getFrame(), "16UC1", self.camera_optical_frame_id, stamp
+                    depth_frame.getFrame(),  # type: ignore
+                    "16UC1",
+                    self.camera_optical_frame_id,
+                    stamp,
                 ),
             )
             self._depth_info_msg.header.stamp = stamp
@@ -313,10 +321,12 @@ class OakDNode(Node):
                 data = self.imu_queue.get()
             except Exception:
                 continue
+
             if data is None:
                 continue
+
             stamp = self.get_clock().now().to_msg()
-            for packet in data.packets:
+            for packet in data.packets:  # type: ignore
                 accel = packet.acceleroMeter
                 gyro = packet.gyroscope
 
@@ -342,8 +352,8 @@ class OakDNode(Node):
                 continue
             stamp = self.get_clock().now().to_msg()
 
-            translation = transform.getTranslation()
-            quat = transform.getQuaternion()
+            translation = transform.getTranslation()  # type: ignore
+            quat = transform.getQuaternion()  # type: ignore
             qx, qy, qz, qw = self._quat_components(quat)
 
             tf_msg = TransformStamped()
@@ -369,7 +379,7 @@ class OakDNode(Node):
                 t_cam_base = r_imu_ros.apply(t_cam_base)
 
                 # Compute inverse transform: T_base^cam_opt
-                r_base_cam = r_cam_base.inv()
+                r_base_cam = r_cam_base.inv()  # type: ignore
                 t_base_cam = -r_base_cam.apply(t_cam_base)
 
                 # 2. Extract raw tracked camera pose in RDF optical coordinates directly from VSLAM node
@@ -383,8 +393,8 @@ class OakDNode(Node):
                 r_12 = r_base_cam * r_odom_cam_opt
                 t_12 = r_base_cam.apply(t_odom_cam_opt) + t_base_cam
 
-                r_odom_base = r_12 * r_cam_base
-                t_odom_base = r_12.apply(t_cam_base) + t_12
+                r_odom_base = r_12 * r_cam_base  # type: ignore
+                t_odom_base = r_12.apply(t_cam_base) + t_12  # type: ignore
 
                 qx_out, qy_out, qz_out, qw_out = r_odom_base.as_quat()
 

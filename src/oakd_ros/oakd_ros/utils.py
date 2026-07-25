@@ -100,20 +100,7 @@ def set_stereo_preset(stereo: depthai.node.StereoDepth) -> None:
     Args:
         stereo (depthai.Node.StereoDepth): StereoDepth node instance.
     """
-    # preset_applied: bool = False
-
-    # for name in ("HIGH_DENSITY", "FAST_DENSITY"):
-    #     preset = getattr(depthai.node.StereoDepth.PresetMode, name, None)
-    #     if preset is not None:
-    #         stereo.setDefaultProfilePreset(preset)
-    #         preset_applied = True
-    #         break
     stereo.setDefaultProfilePreset(depthai.node.StereoDepth.PresetMode.ROBOTICS)
-
-    # if not preset_applied:
-    # stereo.initialConfig.setConfidenceThreshold(200)
-    # stereo.initialConfig.setMedianFilter(depthai.MedianFilter.KERNEL_7x7)
-
     stereo.setLeftRightCheck(True)
 
 
