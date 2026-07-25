@@ -87,5 +87,14 @@ def generate_launch_description():
     )
 
     return LaunchDescription(
-        [rgb_topic_arg, anytraverse_node, trav_map_republisher, unc_map_republisher]
+        [
+            rgb_topic_arg,
+            trav_map_topic_arg,
+            unc_map_topic_arg,
+            params_file_arg,
+            init_prompt_arg,
+            anytraverse_node,
+            trav_map_republisher,
+            unc_map_republisher,
+        ]
     )

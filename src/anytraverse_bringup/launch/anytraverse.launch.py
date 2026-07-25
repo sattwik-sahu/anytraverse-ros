@@ -81,10 +81,22 @@ def generate_launch_description():
         default_value="/anytraverse/cmd_vel",
         description="Topic for AnyTraverse gated cmd_vel output (for HOC)",
     )
+
+    # Standardized capitalized Boolean arguments to prevent NameError in python evaluations
     use_sim_time_arg = DeclareLaunchArgument(
-        name="use_sim_time",
+        "use_sim_time",
         default_value="False",
         description="Use simulation clock if True",
+    )
+    use_composition_arg = DeclareLaunchArgument(
+        "use_composition",
+        default_value="False",
+        description="Whether to use composed bringup for Nav2",
+    )
+    use_respawn_arg = DeclareLaunchArgument(
+        "use_respawn",
+        default_value="False",
+        description="Whether to respawn failed Nav2 nodes",
     )
 
     # Start the camera
@@ -169,7 +181,7 @@ def generate_launch_description():
         ],
     )
 
-    # Navigation launch with obstacle topic and params file
+    # Navigation launch (passing sim_time, composition, and respawn arguments)
     navigation_launch_path = os.path.join(
         moonlab_robots_share_dir, "launch", "navigation.launch.py"
     )
@@ -187,6 +199,8 @@ def generate_launch_description():
             "obstacle_topic": LaunchConfiguration("obstacle_topic"),
             "params_file": nav_params_file_path,
             "use_sim_time": LaunchConfiguration("use_sim_time"),
+            "use_composition": LaunchConfiguration("use_composition"),
+            "use_respawn": LaunchConfiguration("use_respawn"),
         }.items(),
     )
 
@@ -206,6 +220,8 @@ def generate_launch_description():
             robot_arg,
             init_prompt_arg,
             use_sim_time_arg,
+            use_composition_arg,
+            use_respawn_arg,
             oakd_launch,
             robot_launch,
             anytraverse_launch,
