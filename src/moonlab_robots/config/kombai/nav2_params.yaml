@@ -36,6 +36,7 @@ controller_server:
       visualize: false
       reset_period: 1.0 # (only in Humble)
       regenerate_noises: false
+      sgf_order: 2
       TrajectoryVisualizer:
         trajectory_step: 5
         time_step: 3

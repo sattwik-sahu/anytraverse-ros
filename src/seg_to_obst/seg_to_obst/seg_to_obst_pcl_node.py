@@ -1,10 +1,11 @@
-import rclpy
-from rclpy.node import Node
 import message_filters
-from sensor_msgs.msg import CameraInfo, PointCloud2, PointField, Image
-from cv_bridge import CvBridge
 import numpy as np
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+import rclpy
+from cv_bridge import CvBridge
+from rclpy.executors import ExternalShutdownException
+from rclpy.node import Node
+from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
+from sensor_msgs.msg import CameraInfo, Image, PointCloud2, PointField
 
 
 class SegmentationToObstaclePointCloudNode(Node):
@@ -23,9 +24,12 @@ class SegmentationToObstaclePointCloudNode(Node):
         )
 
         # Declare parameters
-        self.declare_parameter(name=self._TRAVERSABILITY_THRESHOLD_PARAM, value=0.5)
-        self.declare_parameter(
-            name=self._CAMERA_OPTICAL_FRAME_ID_PARAM, value="camera_rgb_optical_frame"
+        self.declare_parameters(
+            namespace="",
+            parameters=[
+                (self._TRAVERSABILITY_THRESHOLD_PARAM, 0.5),
+                (self._CAMERA_OPTICAL_FRAME_ID_PARAM, "camera_rgb_optical_frame"),
+            ],
         )
         self._trav_thresh: float = (
             self.get_parameter(self._TRAVERSABILITY_THRESHOLD_PARAM)
@@ -146,9 +150,7 @@ class SegmentationToObstaclePointCloudNode(Node):
 
         # Metadata
         obst_pcl_msg.header = depth_msg.header
-        obst_pcl_msg.header.frame_id = self.get_parameter(
-            self._CAMERA_OPTICAL_FRAME_ID_PARAM
-        ).value
+        obst_pcl_msg.header.frame_id = self._optical_frame_id
         obst_pcl_msg.height = 1
         obst_pcl_msg.width = x_obst.shape[0]
 
@@ -179,7 +181,7 @@ def main(args=None):
 
     try:
         rclpy.spin(node=node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
         node.destroy_node()
