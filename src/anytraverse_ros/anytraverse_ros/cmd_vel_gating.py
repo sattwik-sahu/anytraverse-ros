@@ -1,5 +1,5 @@
 import rclpy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TwistStamped
 from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from std_msgs.msg import Bool
@@ -23,7 +23,7 @@ class CmdVelGating(Node):
         self._hoc_flag = False
 
         self._cmd_vel_sub = self.create_subscription(
-            msg_type=Twist,
+            msg_type=TwistStamped,
             topic="/cmd_vel",
             callback=self._cmd_vel_callback,
             qos_profile=qos_profile,
@@ -36,11 +36,11 @@ class CmdVelGating(Node):
             qos_profile=qos_profile,
         )
 
-    def _cmd_vel_callback(self, msg: Twist) -> None:
+    def _cmd_vel_callback(self, msg: TwistStamped) -> None:
         if self._hoc_flag:
             self._gated_cmd_vel_pub.publish(Twist())
         else:
-            self._gated_cmd_vel_pub.publish(msg)
+            self._gated_cmd_vel_pub.publish(msg.twist)
 
     def _hoc_req_callback(self, msg: Bool) -> None:
         self._hoc_flag = msg.data
