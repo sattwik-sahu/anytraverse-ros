@@ -19,6 +19,7 @@ import depthai as dai
 import numpy as np
 import rclpy
 from geometry_msgs.msg import TransformStamped
+from nav_msgs.msg import Odometry
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from rclpy.qos import QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
@@ -26,7 +27,6 @@ from rclpy.signals import SignalHandlerOptions
 from scipy.spatial.transform import Rotation as R
 from sensor_msgs.msg import CameraInfo, Image, Imu
 from tf2_ros import Buffer, TransformBroadcaster, TransformListener
-from nav_msgs.msg import Odometry
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_A
 LEFT_SOCKET = dai.CameraBoardSocket.CAM_B
