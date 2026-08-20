@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 ROS 2 node that streams color data from an OAK-D Pro W using the DepthAI v3 API and RTAB-Map SLAM.
 
@@ -27,6 +26,7 @@ from rclpy.signals import SignalHandlerOptions
 from scipy.spatial.transform import Rotation as R
 from sensor_msgs.msg import CameraInfo, Image, Imu
 from tf2_ros import Buffer, TransformBroadcaster, TransformListener
+from nav_msgs.msg import Odometry
 
 RGB_SOCKET = dai.CameraBoardSocket.CAM_A
 LEFT_SOCKET = dai.CameraBoardSocket.CAM_B
@@ -132,6 +132,9 @@ class OakDNode(Node):
             CameraInfo, "oak/depth/camera_info", sensor_qos
         )
         self.imu_pub = self.create_publisher(Imu, "oak/imu/data", sensor_qos)
+        self._odom_pub = self.create_publisher(
+            msg_type=Odometry, topic="odom", qos_profile=sensor_qos
+        )
 
         self.tf_broadcaster = TransformBroadcaster(self)
         self.tf_buffer = Buffer()
@@ -140,6 +143,11 @@ class OakDNode(Node):
         self._stop = threading.Event()
         self._threads = []
         self._last_tf_warn_time = 0.0
+
+        # For odometry
+        self._prev_odom_time = None
+        self._prev_odom_position = None
+        self._prev_odom_rotation = None
 
         self._build_and_start_pipeline()
 
@@ -396,7 +404,69 @@ class OakDNode(Node):
                 r_odom_base = r_12 * r_cam_base  # type: ignore
                 t_odom_base = r_12.apply(t_cam_base) + t_12  # type: ignore
 
+                # --------------------------------------------------------------
+                # Estimate body-frame velocity from consecutive odom->base poses
+                # --------------------------------------------------------------
+                current_time = self.get_clock().now()
+                current_time_sec = current_time.nanoseconds * 1e-9
+
+                linear_velocity = np.zeros(3)
+                angular_velocity = np.zeros(3)
+
+                if (
+                    self._prev_odom_time is not None
+                    and self._prev_odom_position is not None
+                    and self._prev_odom_rotation is not None
+                ):
+                    dt = current_time_sec - self._prev_odom_time
+
+                    if 1e-4 < dt < 0.5:
+                        # Position difference is initially in odom/world frame.
+                        delta_position_odom = t_odom_base - self._prev_odom_position
+
+                        # Odometry twist is conventionally expressed in child_frame_id,
+                        # i.e. base_link. Transform world-frame velocity into base_link.
+                        linear_velocity = (
+                            r_odom_base.inv().apply(delta_position_odom) / dt
+                        )
+
+                        # Relative rotation from previous base orientation to current.
+                        delta_rotation = self._prev_odom_rotation.inv() * r_odom_base
+
+                        # Rotation vector = axis * angle.
+                        angular_velocity = delta_rotation.as_rotvec() / dt
+
+                self._prev_odom_time = current_time_sec
+                self._prev_odom_position = t_odom_base.copy()
+                self._prev_odom_rotation = r_odom_base
+
                 qx_out, qy_out, qz_out, qw_out = r_odom_base.as_quat()
+
+                # Create and publish odom msg
+                odom_msg = Odometry()
+
+                odom_msg.header.stamp = current_time.to_msg()
+                odom_msg.header.frame_id = self.odom_frame_id
+                odom_msg.child_frame_id = self.base_frame_id
+
+                odom_msg.pose.pose.position.x = float(t_odom_base[0])
+                odom_msg.pose.pose.position.y = float(t_odom_base[1])
+                odom_msg.pose.pose.position.z = float(t_odom_base[2])
+
+                odom_msg.pose.pose.orientation.x = float(qx_out)
+                odom_msg.pose.pose.orientation.y = float(qy_out)
+                odom_msg.pose.pose.orientation.z = float(qz_out)
+                odom_msg.pose.pose.orientation.w = float(qw_out)
+
+                odom_msg.twist.twist.linear.x = float(linear_velocity[0])
+                odom_msg.twist.twist.linear.y = float(linear_velocity[1])
+                odom_msg.twist.twist.linear.z = float(linear_velocity[2])
+
+                odom_msg.twist.twist.angular.x = float(angular_velocity[0])
+                odom_msg.twist.twist.angular.y = float(angular_velocity[1])
+                odom_msg.twist.twist.angular.z = float(angular_velocity[2])
+
+                self._safe_publish(self._odom_pub, odom_msg)
 
                 tf_msg.child_frame_id = self.base_frame_id
                 tf_msg.transform.translation.x = float(t_odom_base[0])
