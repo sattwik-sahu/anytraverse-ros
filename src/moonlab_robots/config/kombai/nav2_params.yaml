@@ -199,8 +199,10 @@ global_costmap:
       rolling_window: true
       width: 100
       height: 100
-      # plugins: ["voxel_layer", "inflation_layer"]
-      plugins: ["obstacle_layer", "inflation_layer"]
+      plugins:
+        - voxel_layer
+        - inflation_layer
+        - denoise_layer
 
       # voxel_layer:
       #   plugin: "nav2_costmap_2d::VoxelLayer"
@@ -241,6 +243,12 @@ global_costmap:
           clearing: True # Since we have no static map, clearing is vital to remove old obstacles
           marking: True
           data_type: "PointCloud2"
+
+      denoise_layer:
+        plugin: "nav2_costmap_2d::DenoiseLayer"
+        enabled: true
+        minimal_group_size: 5
+        group_connectivity_type: 8
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
