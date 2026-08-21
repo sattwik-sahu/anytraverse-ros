@@ -247,7 +247,7 @@ global_costmap:
       denoise_layer:
         plugin: "nav2_costmap_2d::DenoiseLayer"
         enabled: true
-        minimal_group_size: 16
+        minimal_group_size: 8
         group_connectivity_type: 8
 
       inflation_layer:
