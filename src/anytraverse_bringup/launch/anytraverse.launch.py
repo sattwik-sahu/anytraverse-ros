@@ -19,11 +19,6 @@ def generate_launch_description():
     moonlab_robots_share_dir = get_package_share_directory("moonlab_robots")
 
     # Args
-    obstacle_topic_arg = DeclareLaunchArgument(
-        "obstacle_topic",
-        default_value="/anytraverse/obstacle_points",
-        description="Topic to remap for obstacle avoidance",
-    )
     trav_map_topic_arg = DeclareLaunchArgument(
         "trav_map_topic",
         default_value="/anytraverse/trav_map",
@@ -70,11 +65,6 @@ def generate_launch_description():
         name="camera_frame_id",
         default_value="camera_frame",
         description="TF frame ID for the camera frame",
-    )
-    camera_optical_frame_id_arg = DeclareLaunchArgument(
-        name="camera_optical_frame_id",
-        default_value="camera_rgb_optical_frame",
-        description="TF frame ID for the camera optical frame",
     )
     gated_cmd_vel_topic_arg = DeclareLaunchArgument(
         name="gated_cmd_vel_topic",
@@ -157,30 +147,6 @@ def generate_launch_description():
         ],
     )
 
-    # Start the 'obstacle_pcl_node' with remappings
-    obstacle_pcl_node = Node(
-        package="seg_to_obst",
-        executable="seg_to_obst_pcl_node",
-        name="obstacle_pcl",
-        output="screen",
-        remappings=[
-            ("/trav_map", LaunchConfiguration("trav_map_topic")),
-            ("/obstacle_points", LaunchConfiguration("obstacle_topic")),
-            ("/camera/depth/image_raw", LaunchConfiguration("camera_depth_topic")),
-            (
-                "/camera/depth/camera_info",
-                LaunchConfiguration("camera_depth_info_topic"),
-            ),
-        ],
-        parameters=[
-            {
-                "camera_optical_frame_id": LaunchConfiguration(
-                    "camera_optical_frame_id"
-                ),
-            }
-        ],
-    )
-
     # Navigation launch (passing sim_time, composition, and respawn arguments)
     navigation_launch_path = os.path.join(
         moonlab_robots_share_dir, "launch", "navigation.launch.py"
@@ -196,7 +162,6 @@ def generate_launch_description():
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(navigation_launch_path),
         launch_arguments={
-            "obstacle_topic": LaunchConfiguration("obstacle_topic"),
             "params_file": nav_params_file_path,
             "use_sim_time": LaunchConfiguration("use_sim_time"),
             "use_composition": LaunchConfiguration("use_composition"),
@@ -206,7 +171,6 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            obstacle_topic_arg,
             trav_map_topic_arg,
             unc_map_topic_arg,
             camera_rgb_topic_arg,
@@ -214,7 +178,6 @@ def generate_launch_description():
             camera_depth_topic_arg,
             camera_depth_info_topic_arg,
             imu_topic_arg,
-            camera_optical_frame_id_arg,
             camera_frame_id_arg,
             gated_cmd_vel_topic_arg,
             robot_arg,
@@ -225,7 +188,6 @@ def generate_launch_description():
             oakd_launch,
             robot_launch,
             anytraverse_launch,
-            obstacle_pcl_node,
             navigation_launch,
             cmd_vel_gating_node,
         ]

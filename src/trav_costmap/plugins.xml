@@ -1,0 +1,12 @@
+<library path="trav_costmap">
+  <class
+    name="custom_costmap_layers::TraversabilityLayer"
+    type="custom_costmap_layers::TraversabilityLayer"
+    base_class_type="nav2_costmap_2d::Layer">
+    <description>
+      Traversability-aware costmap layer that unprojects depth camera frames,
+      applies traversability-weighted cost assignment, and performs optimized
+      raytracing clearing for dynamic obstacle removal.
+    </description>
+  </class>
+</library>

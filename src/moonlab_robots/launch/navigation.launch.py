@@ -2,19 +2,11 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import SetRemap
 from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
     nav2_bringup_pkg = FindPackageShare("nav2_bringup")
-
-    # Obstacle pointclouds topic arg
-    obstacle_topic_arg = DeclareLaunchArgument(
-        "obstacle_topic",
-        default_value="/obstacle_points",
-        description="Topic to remap for obstacle avoidance",
-    )
 
     # Nav2 params file arg
     params_file_arg = DeclareLaunchArgument(
@@ -41,7 +33,6 @@ def generate_launch_description():
 
     nav2_group = GroupAction(
         actions=[
-            SetRemap(src="/obstacle_points", dst=LaunchConfiguration("obstacle_topic")),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
@@ -61,7 +52,6 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            obstacle_topic_arg,
             params_file_arg,
             sim_time_arg,
             composition_arg,
