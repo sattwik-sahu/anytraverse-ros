@@ -93,7 +93,7 @@ class OakDNode(Node):
             parameters=[
                 ("rgb_size", [640, 400]),
                 ("mono_size", [640, 400]),
-                ("fps", 60),
+                ("fps", 30),
                 ("imu_hz", 200),
                 ("camera_optical_frame_id", "oak_rgb_camera_optical_frame"),
                 ("imu_frame_id", "oak_imu_frame"),
